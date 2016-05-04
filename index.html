@@ -1,0 +1,93 @@
+<html>
+   
+   <head>
+      <title>DAO Voting</title>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="description" content="">
+      <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+      <link rel="stylesheet" href="custom.css"/>
+      <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+      <link rel="stylesheet" href="bower_components/angular-material/angular-material.css"/>
+      <script src="bower_components/web3/dist/web3.js"></script>
+     
+     
+     
+   </head>
+
+
+   <body ng-app="daovoting" ng-controller="DaoVotingCtrl">
+       
+       
+       
+   <div layout="row" flex="100">      
+    <div layout="column" flex="40" ng-cloak style="height:100%">       
+      <md-toolbar class="md-theme-light">
+         <h2 class="md-toolbar-tools">
+            <span>Proposals</span>
+         </h2>
+      </md-toolbar>
+      <md-content >
+         <md-list>
+            <md-list-item ng-click="showProposal(p, $event)" class="md-3-line {{p.active?'newProposal':'oldProposal'}}" ng-repeat="p in proposals">
+            <identicon username="p.creator" size="48" class="face"></identicon>
+            <div class="md-list-item-text">
+               <h3>{{p.description}}</h3>
+               <h4>{{p.votingDeadline.toLocaleDateString()}}</h4>
+               <p>{{p.amount}} ETH</p>
+            </div>
+            <md-divider md-inset ng-if="!$last"></md-divider>
+            </md-list-item>
+         </md-list>
+      </md-content>
+      </div>
+      
+      <div  layout="column" flex ng-show="currentProposal" >
+         <md-toolbar class="md-theme-light">
+            <h2 class="md-toolbar-tools">
+               <span>Details</span>
+            </h2>
+         </md-toolbar>
+      <md-content flex layout-padding>
+            <identicon username="currentProposal.creator" size="80" class="bugface"></identicon>
+            <div class="md-list-item-text">
+               <h3>{{currentProposal.description}}</h3>
+               
+               <h4>open for voting until {{currentProposal.votingDeadline}}</h4>
+               <p>{{currentProposal.amount}} ETH</p>
+               
+               <p>
+                  Result: YES: {{ currentProposal.yea }} &nbsp; NO: {{ currentProposal.nay }}
+               </p>
+               
+               <p>
+                  created by {{ currentProposal.creator }}
+                  recipient : {{ currentProposal.recipient }}
+               </p>
+            </div>
+            <form>
+               <md-button>YES</md-button>
+               <md-button>NO</md-button>
+            </form>
+         
+      </md-content>
+         
+      </div>
+      
+   </div>
+       
+       
+       
+       
+       <script src="bower_components/angular/angular.min.js"></script>
+       <script src="bower_components/angular-animate/angular-animate.min.js"></script>
+       <script src="bower_components/angular-messages/angular-messages.min.js"></script>
+       <script src="bower_components/angular-aria/angular-aria.min.js"></script>
+       <script src="bower_components/angular-material/angular-material.js"></script>
+       <script src="bower_components/identicon/pnglib.js"></script>
+       <script src="bower_components/identicon/identicon.js"></script>
+       <script src="bower_components/angular-identicon/dist/angular-identicon.min.js"></script>
+       <script src="voting.js"></script>
+   </body>
+      
+</html>

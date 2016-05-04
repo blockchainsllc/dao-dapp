@@ -1,0 +1,23 @@
+{
+  "name": "dao voting",
+  "description": "www",
+  "version": "0.0.1",
+  "homepage": "",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "angular": "^1.4.x",
+    "angular-messages": "^1.4.x",
+    "angular-animate": "^1.4.x",
+    "angular-aria": "^1.4.x",
+    "angular-material": "^0.11.4",
+    "web3": "^0.15.0",
+    "underscore": "~1.8.3",
+    "jquery": "~1.12.2",
+    "bootstrap": "^3.3.6",
+    "angular-identicon": "^0.1.18"
+  },
+  "devDependencies": {
+    "angular-material": "~0.11.4"
+  }
+}
