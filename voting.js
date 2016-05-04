@@ -12,6 +12,33 @@ function sha3Int(p) {
    angular
    .module('daovoting', [ 'ngMaterial', 'ngAnimate','ngMessages' ,'ui.identicon'])
    .controller('DaoVotingCtrl', [ '$scope', '$mdBottomSheet', '$mdDialog','$log', '$q', '$http','$timeout', DaoVotingCtrl ])
+   .directive('collapse', [function () {
+		return {
+			restrict: 'A',
+			link: function ($scope, ngElement, attributes) {
+				var element = ngElement[0];
+				$scope.$watch(attributes.collapse, function (collapse) {
+					var newHeight = collapse ? 0 : getElementAutoHeight();
+					element.style.height = newHeight + 'px';
+          element.style.opacity = collapse ? 0 : 1;
+					ngElement.toggleClass('collapsed', collapse);
+				});
+
+				function getElementAutoHeight() {
+					var currentHeight = getElementCurrentHeight();
+					element.style.height = 'auto';
+					var autoHeight = getElementCurrentHeight();
+					element.style.height = currentHeight;
+					getElementCurrentHeight(); // Force the browser to recalc height after moving it back to normal
+					return autoHeight;
+				}
+
+				function getElementCurrentHeight() {
+					return element.offsetHeight
+				}
+			}
+		};
+	}])
    .config(function($mdThemingProvider){
       $mdThemingProvider.theme('default')
       .primaryPalette('blue-grey')

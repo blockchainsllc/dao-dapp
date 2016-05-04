@@ -6,9 +6,25 @@
 }
 
 .face {
-    border-radius: 30px;
+  border-radius: 30px;
   border: 1px solid #ddd;
   width: 48px;
   height: 48px;
   margin: 16px;
+}
+
+.slideDown {
+    -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+  -moz-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+  -o-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+}
+
+.md-list-item-inner {
+    -webkit-align-items: flex-start !important;
+    -ms-flex-align: flex-start !important;
+}
+
+md-list-item-text {
+  
 }

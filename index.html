@@ -17,11 +17,9 @@
 
 
    <body ng-app="daovoting" ng-controller="DaoVotingCtrl">
+    
        
-       
-       
-   <div layout="row" flex="100">      
-    <div layout="column" flex="40" ng-cloak style="height:100%">       
+    <div layout="column" flex ng-cloak style="height:100%">       
       <md-toolbar class="md-theme-light">
          <h2 class="md-toolbar-tools">
             <span>Proposals</span>
@@ -29,12 +27,19 @@
       </md-toolbar>
       <md-content >
          <md-list>
-            <md-list-item ng-click="showProposal(p, $event)" class="md-3-line {{p.active?'newProposal':'oldProposal'}}" ng-repeat="p in proposals">
+            <md-list-item ng-click="showProposal(p, $event)" class="{{p.active?'newProposal':'oldProposal'}}" ng-repeat="p in proposals">
             <identicon username="p.creator" size="48" class="face"></identicon>
             <div class="md-list-item-text">
                <h3>{{p.description}}</h3>
                <h4>{{p.votingDeadline.toLocaleDateString()}}</h4>
                <p>{{p.amount}} ETH</p>
+               <div class="slideDown" collapse="currentProposal!==p">
+                   <div>
+                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird
+                        on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table,
+                        raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                    </div>
+               </div>
             </div>
             <md-divider md-inset ng-if="!$last"></md-divider>
             </md-list-item>
@@ -42,40 +47,8 @@
       </md-content>
       </div>
       
-      <div  layout="column" flex ng-show="currentProposal" >
-         <md-toolbar class="md-theme-light">
-            <h2 class="md-toolbar-tools">
-               <span>Details</span>
-            </h2>
-         </md-toolbar>
-      <md-content flex layout-padding>
-            <identicon username="currentProposal.creator" size="80" class="bugface"></identicon>
-            <div class="md-list-item-text">
-               <h3>{{currentProposal.description}}</h3>
-               
-               <h4>open for voting until {{currentProposal.votingDeadline}}</h4>
-               <p>{{currentProposal.amount}} ETH</p>
-               
-               <p>
-                  Result: YES: {{ currentProposal.yea }} &nbsp; NO: {{ currentProposal.nay }}
-               </p>
-               
-               <p>
-                  created by {{ currentProposal.creator }}
-                  recipient : {{ currentProposal.recipient }}
-               </p>
-            </div>
-            <form>
-               <md-button>YES</md-button>
-               <md-button>NO</md-button>
-            </form>
-         
-      </md-content>
-         
-      </div>
-      
-   </div>
-       
+     
+
        
        
        
@@ -87,6 +60,7 @@
        <script src="bower_components/identicon/pnglib.js"></script>
        <script src="bower_components/identicon/identicon.js"></script>
        <script src="bower_components/angular-identicon/dist/angular-identicon.min.js"></script>
+       <script src="bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
        <script src="voting.js"></script>
    </body>
       
