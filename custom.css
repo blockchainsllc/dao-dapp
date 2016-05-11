@@ -53,3 +53,7 @@ md-list-item-text {
 .md-toolbar-tools .md-label {
     color:black
 }
+
+.date {
+  padding-right: 10px;
+}

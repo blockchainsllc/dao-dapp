@@ -44,33 +44,37 @@
                 <div class="md-list-item-text" flex>
                     <h3 class="desc noselect" ng-click="showProposal(p)">{{p.description}}</h3>
                     <div layout="row" flex>
-                        <div>Amount: {{p.amount}} ETH</div>
+                        <div flex="10">Amount:</div><div><b> {{p.amount | number:2 }} </b>ETH</div>
                         <div flex> </div>
-                        <div>ends: {{p.votingDeadline.toLocaleDateString()}}</div>
+                        <div class="date">ends: {{p.votingDeadline.toLocaleDateString()}}</div>
                     </div>
                     <div ng-bind-html="p.descriptionHTML">test</div>
                     <div class="slideDown" collapse="currentProposal!==p" style="display:none">
                         <div>
-                            created by {{ p.creator }} for {{p.recipient}}.
-                            <div>deposit: {{p.proposalDeposit}} ETH</div>
+                            <div layout="row" flex><div flex="10">Creator: </div><div > {{ p.creator }} </div></div>                                
+                            <div layout="row" flex><div flex="10">Recipient: </div><div > {{ p.recipient }} </div>      </div>                          
+                            <div layout="row" flex><div flex="10">Deposit: </div><div > {{ p.proposalDeposit | number:2 }} ETH </div>     </div>                           
+                                
                             <div ng-show="p.split">
-                                This Proposal wants to split the DAO and create a new one with the following curator : 
-                                <pre>{{p.newCurator}}</pre>
+                                This Proposal wants to split the DAO and create a new one with a new curator. 
                             </div>
                             
-                            <div ng-show="!p.open">
-                               Passed : 
-                               <span ng-show="p.propoalPassed" style="color:green;font-size:12px">Yes</span>
-                               <span ng-show="!p.propoalPassed" style="color:red;font-size:12px">No</span>
+                            <div ng-show="!p.open" layout="row" flex>
+                               <div flex="10">Passed with :</div>
+                               <div> 
+                                 <span ng-show="p.propoalPassed" style="color:green;font-size:12px">Yes</span>
+                                 <span ng-show="!p.propoalPassed" style="color:red;font-size:12px">No</span>
+                               </div>
+                             
                             </div>
                             
-                            <div layout="row" flex>
+                            <div style="margin-top:20px" layout="row" flex>
                                  <div flex="20">Yes:</div>
                                  <div flex="20">{{p.yea}} ({{p.yea*100/total | number:2}}%)</div>
                                  <md-progress-linear flex md-mode="determinate" value="{{p.yea*100/total}}"></md-progress-linear>
                             </div> 
                             
-                            <div layout="row" flex>
+                            <div style="margin-bottom:20px" layout="row" flex>
                                  <div flex="20">No:</div>
                                  <div flex="20">{{p.nay}} ({{p.nay*100/total | number:2}}%)</div>
                                  <md-progress-linear flex md-mode="determinate" value="{{p.nay*100/total}}"></md-progress-linear>
