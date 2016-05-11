@@ -10,42 +10,83 @@
       <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
       <link rel="stylesheet" href="bower_components/angular-material/angular-material.css"/>
       <script src="bower_components/web3/dist/web3.js"></script>
-     
-     
-     
    </head>
 
 
    <body ng-app="daovoting" ng-controller="DaoVotingCtrl">
     
-       
+
+     
     <div layout="column" flex ng-cloak style="height:100%">       
-      <md-toolbar class="md-theme-light">
-         <h2 class="md-toolbar-tools">
-            <span>Proposals</span>
-         </h2>
+      <md-progress-linear md-mode="determinate" value="{{proposals.length*100/allProposals}}"></md-progress-linear>
+      <md-toolbar class="md-theme-light" >
+         <div class="md-toolbar-tools">
+            <h2><span>Proposals</span></h2>
+            <span flex> </span>
+            <span layout="row">
+                <md-radio-group ng-model="filter.active" layout="row">
+                    <md-radio-button ng-value="true" >current ( {{(proposals | filter:{active:true}).length}} )</md-radio-button>
+                    <md-radio-button ng-value="false"> old ( {{(proposals | filter:{active:false}).length}} )</md-radio-button>
+                </md-radio-group>
+                <md-radio-group ng-model="filter.split" layout="row">
+                    <md-radio-button ng-value="false" >Proposal ( {{(proposals | filter:{split:false}).length}} )</md-radio-button>
+                    <md-radio-button ng-value="true"> Split ( {{(proposals | filter:{split:true}).length}} )</md-radio-button>
+                </md-radio-group>
+            </span>
+
+         </div>
+
       </md-toolbar>
       <md-content >
          <md-list>
-            <md-list-item ng-click="showProposal(p, $event)" class="{{p.active?'newProposal':'oldProposal'}}" ng-repeat="p in proposals">
-            <identicon username="p.creator" size="48" class="face"></identicon>
-            <div class="md-list-item-text">
-               <h3>{{p.description}}</h3>
-               <h4>{{p.votingDeadline.toLocaleDateString()}}</h4>
-               <p>{{p.amount}} ETH</p>
-               <div class="slideDown" collapse="currentProposal!==p">
-                   <div>
-                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird
-                        on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table,
-                        raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+            <md-list-item class="{{p.active?'newProposal':'oldProposal'}}" ng-repeat="p in proposals | filter:filter:strict">
+                <identicon username="p.creator" size="48" class="face noselect" ng-click="showProposal(p)"></identicon>
+                <div class="md-list-item-text" flex>
+                    <h3 class="desc noselect" ng-click="showProposal(p)">{{p.description}}</h3>
+                    <div layout="row" flex>
+                        <div>Amount: {{p.amount}} ETH</div>
+                        <div flex> </div>
+                        <div>ends: {{p.votingDeadline.toLocaleDateString()}}</div>
                     </div>
-               </div>
-            </div>
-            <md-divider md-inset ng-if="!$last"></md-divider>
+                    <div ng-bind-html="p.descriptionHTML">test</div>
+                    <div class="slideDown" collapse="currentProposal!==p" style="display:none">
+                        <div>
+                            created by {{ p.creator }} for {{p.recipient}}.
+                            <div>deposit: {{p.proposalDeposit}} ETH</div>
+                            <div ng-show="p.split">
+                                This Proposal wants to split the DAO and create a new one with the following curator : 
+                                <pre>{{p.newCurator}}</pre>
+                            </div>
+                            
+                            <div ng-show="!p.open">
+                               Passed : 
+                               <span ng-show="p.propoalPassed" style="color:green;font-size:12px">Yes</span>
+                               <span ng-show="!p.propoalPassed" style="color:red;font-size:12px">No</span>
+                            </div>
+                            
+                            <div layout="row" flex>
+                                 <div flex="20">Yes:</div>
+                                 <div flex="20">{{p.yea}} ({{p.yea*100/total | number:2}}%)</div>
+                                 <md-progress-linear flex md-mode="determinate" value="{{p.yea*100/total}}"></md-progress-linear>
+                            </div> 
+                            
+                            <div layout="row" flex>
+                                 <div flex="20">No:</div>
+                                 <div flex="20">{{p.nay}} ({{p.nay*100/total | number:2}}%)</div>
+                                 <md-progress-linear flex md-mode="determinate" value="{{p.nay*100/total}}"></md-progress-linear>
+                            </div> 
+                            
+                            <div>
+                              <md-button class="md-raised md-primary"  ng-disabled="!p.enabled" ng-click="sendVotingTransaction($event,true)">YES</md-button>
+                              <md-button class="md-raised md-primary"  ng-disabled="!p.enabled" ng-click="sendVotingTransaction($event,false)">NO</md-button>
+                            </div>
+                        </div>
+                    </div>            
+                </div>
             </md-list-item>
          </md-list>
       </md-content>
-      </div>
+    </div>
       
      
 
@@ -53,6 +94,7 @@
        
        
        <script src="bower_components/angular/angular.min.js"></script>
+       <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
        <script src="bower_components/angular-animate/angular-animate.min.js"></script>
        <script src="bower_components/angular-messages/angular-messages.min.js"></script>
        <script src="bower_components/angular-aria/angular-aria.min.js"></script>
@@ -61,6 +103,7 @@
        <script src="bower_components/identicon/identicon.js"></script>
        <script src="bower_components/angular-identicon/dist/angular-identicon.min.js"></script>
        <script src="bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
+       <script src="bower_components/marked/lib/marked.js"></script>
        <script src="voting.js"></script>
    </body>
       
