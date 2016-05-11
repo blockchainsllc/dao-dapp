@@ -35,6 +35,13 @@ md-list-item {
   border-bottom-color: #cccccc;
   padding-bottom:5px;
 }
+
+.progressRow {
+  align-items: center !important;
+  -webkit-align-items: center !important;
+  -ms-flex-align: center !important;
+  padding-right:10px
+}
 md-list-item-text {
   
 }

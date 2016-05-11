@@ -68,15 +68,17 @@
                              
                             </div>
                             
-                            <div style="margin-top:20px" layout="row" flex>
-                                 <div flex="20">Yes:</div>
-                                 <div flex="20">{{p.yea}} ({{p.yea*100/total | number:2}}%)</div>
+                            <div style="margin-top:20px" class="progressRow" layout="row" flex>
+                                 <div flex="10">Yes:</div>
+                                 <div flex="25">{{p.yea| number:0}}</div>
+                                 <div flex="8">({{p.yea*100/total | number:2}}%) &nbsp;</div>
                                  <md-progress-linear flex md-mode="determinate" value="{{p.yea*100/total}}"></md-progress-linear>
                             </div> 
                             
-                            <div style="margin-bottom:20px" layout="row" flex>
-                                 <div flex="20">No:</div>
-                                 <div flex="20">{{p.nay}} ({{p.nay*100/total | number:2}}%)</div>
+                            <div style="margin-bottom:20px" class="progressRow" layout="row" flex>
+                                 <div flex="10">No:</div>
+                                 <div flex="25">{{p.nay | number:0}}</div>
+                                 <div flex="8">({{p.nay*100/total | number:2}}%) &nbsp;</div>
                                  <md-progress-linear flex md-mode="determinate" value="{{p.nay*100/total}}"></md-progress-linear>
                             </div> 
                             
