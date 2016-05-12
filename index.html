@@ -23,15 +23,22 @@
          <div class="md-toolbar-tools">
             <h2><span>Proposals</span></h2>
             <span flex> </span>
-            <span layout="row">
-                <md-radio-group ng-model="filter.active" layout="row">
+            <span layout="row" style="font-size:12px" class="centeredRow">
+                <md-radio-group ng-model="filter.active" layout="row"  class="centeredRow">
                     <md-radio-button ng-value="true" >current ( {{(proposals | filter:{active:true}).length}} )</md-radio-button>
                     <md-radio-button ng-value="false"> old ( {{(proposals | filter:{active:false}).length}} )</md-radio-button>
                 </md-radio-group>
-                <md-radio-group ng-model="filter.split" layout="row">
+                <md-radio-group ng-model="filter.split" layout="row" class="centeredRow">
                     <md-radio-button ng-value="false" >Proposal ( {{(proposals | filter:{split:false}).length}} )</md-radio-button>
                     <md-radio-button ng-value="true"> Split ( {{(proposals | filter:{split:true}).length}} )</md-radio-button>
                 </md-radio-group>
+                <div layout="row" ng-show="accounts && accounts.length>1" class="centeredRow">
+                    <md-select ng-model="account">
+                        <md-option ng-repeat="entry in accounts" value="{{entry}}">
+                            {{entry}}
+                        </md-option>
+                    </md-select>
+                </div>
             </span>
 
          </div>
@@ -44,7 +51,7 @@
                 <div class="md-list-item-text" flex>
                     <h3 class="desc noselect" ng-click="showProposal(p)">{{p.description}}</h3>
                     <div layout="row" flex>
-                        <div flex="10">Amount:</div><div><b> {{p.amount | number:2 }} </b>ETH</div>
+                        <div flex="10" ng-show="!p.split">Amount:</div><div ng-show="!p.split"><b> {{p.amount | number:2 }} </b>ETH</div>
                         <div flex> </div>
                         <div class="date">ends: {{p.votingDeadline.toLocaleDateString()}}</div>
                     </div>
@@ -56,7 +63,7 @@
                             <div layout="row" flex><div flex="10">Deposit: </div><div > {{ p.proposalDeposit | number:2 }} ETH </div>     </div>                           
                                 
                             <div ng-show="p.split">
-                                This Proposal wants to split the DAO and create a new one with a new curator. 
+                                This Proposal is requesting a new Curator; it will split The DAO to create it's own DAO. Voting Yes allows you to also Split. You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO.
                             </div>
                             
                             <div ng-show="!p.open" layout="row" flex>

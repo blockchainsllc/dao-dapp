@@ -36,6 +36,13 @@ md-list-item {
   padding-bottom:5px;
 }
 
+
+.centeredRow {
+  align-items: center !important;
+  -webkit-align-items: center !important;
+  -ms-flex-align: center !important;
+}
+
 .progressRow {
   align-items: center !important;
   -webkit-align-items: center !important;
@@ -57,6 +64,9 @@ md-list-item-text {
                                   not supported by any browser */
 }
 
+.md-select-value span {
+  color: black;
+}
 .md-toolbar-tools .md-label {
     color:black
 }
