@@ -45,19 +45,64 @@
       .accentPalette('red');
    }) ;
 
+
+// define main-controller
+function DaoVotingCtrl( $scope, $mdBottomSheet, $mdDialog,  $log, $q, $http,$timeout) {
+
+
+   $scope.account = "";                           // address of the user to send the transaction from.
+   $scope.accounts = [$scope.account];            // the list of users accounts                    
+   $scope.filter = { active:true, split: false};  // filter the proposal list 
+   $scope.total=1;                                // number of Propsals existing
+   $scope.proposals = [];                         // loaded Proposals
    
+   $scope.showProposal = function(p,ev) {         // called, when selecting a proposal 
+      $scope.currentProposal=p;
+      
+      if (!p.gasNeeded) {
+        // we need to check, if the user already voted. We do this, by calling the vote-function without a transaction and checking if all the gas is used, which means
+        // a error was thrown ans so the user is not allowed to vote.
+        var gas = 0x999999;
+        web3.eth.estimateGas({ to: address, data: buildVoteFunctionData(p.id,true), from: $scope.account, gas: gas, }, function(err,data) {
+           // only if the estimated gas is lower then the given we knwo it would be succesful, otherwise all the gas is used, because a exception is thrown.
+           p.enabled   = data < gas;
+           p.gasNeeded = data;
+           $scope.$apply();
+        });
+      }
+   };
+   
+   $scope.sendVotingTransaction = function(ev, accept) {
+     web3.eth.sendTransaction({
+         to  : address, 
+         data: buildVoteFunctionData($scope.currentProposal.id,accept), 
+         from: $scope.account, 
+         gas:  $scope.currentProposal.gasNeeded*2
+     }, function(err,data){
+       $mdDialog.show(
+        $mdDialog.alert()
+          .clickOutsideToClose(true)
+          .title(err ? 'Error sending your vote' : 'Voting sent')
+          .content(err ? ('Your vote could not be send! '+err) : 'Your vote has been sent, waiting for the transaction to be confirmed.')
+          .ariaLabel('Voting sent')
+          .ok('Got it!')
+          .targetEvent(ev)
+      );
+    
+     });
+   };
+
+   // the address of the dao
+   var address = "0xbb9bc244d798123fde783fcc1c72d3bb8c189413";
+   address  ="0xad23d7c443382333543dd13c3b77b99b2a7e2c6d"; // just for testing, we use a test-dao
+
    // pick up the global web3-object injected by mist.
    if(typeof web3 !== 'undefined')
       web3 = new Web3(web3.currentProvider);
    else
       web3 = new Web3(new Web3.providers.HttpProvider("http://37.120.164.112:8555"));
 
-
-   
-   
-   var address = "0xbb9bc244d798123fde783fcc1c72d3bb8c189413";
-   address  ="0xad23d7c443382333543dd13c3b77b99b2a7e2c6d";
-   
+   // define the dao-contract   
    var abi = [
      {name:'proposals', "type":"function","outputs":[
        {"type":"address","name":"recipient"},
@@ -85,61 +130,13 @@
    ];
 
    var contract = web3.eth.contract(abi).at(address);
-   
-function buildData(proposal, supports) {
-    return contract.vote.getData(proposal, supports);
-}
 
+   // builds the data for the vote-function   
+   function buildVoteFunctionData(proposal, supports) {
+      return contract.vote.getData(proposal, supports);
+   }
 
-
-
-
-// define main-controller
-function DaoVotingCtrl( $scope, $mdBottomSheet, $mdDialog,  $log, $q, $http,$timeout) {
-   
-   $scope.accounts = [address];
-   $scope.account = address;                         // address of the user to send the transaction from.
-   $scope.filter = { active:true, split: false};  // filter the proposal list 
-   $scope.total=1;                                // number of Propsals existing
-   $scope.proposals = [];                         // loaded Proposals
-   
-   $scope.showProposal = function(p,ev) {         // called, when selecting a proposal 
-      $scope.currentProposal=p;
-      
-      if (!p.gasNeeded) {
-        // we need to check, if the user already voted. We do this, by calling the vote-function without a transaction and checking if all the gas is used, which means
-        // a error was thrown ans so the user is not allowed to vote.
-        var gas = 0x999999;
-        web3.eth.estimateGas({ to: address, data: buildData(p.id,true), from: $scope.account, gas: gas, }, function(err,data) {
-           // only if the estimated gas is lower then the given we knwo it would be succesful, otherwise all the gas is used, because a exception is thrown.
-           p.enabled   = data < gas;
-           p.gasNeeded = data;
-           $scope.$apply();
-        });
-      }
-   };
-   
-   $scope.sendVotingTransaction = function(ev, accept) {
-     web3.eth.sendTransaction({
-         to  : address, 
-         data: buildData($scope.currentProposal.id,accept), 
-         from: $scope.account, 
-         gas:  $scope.currentProposal.gasNeeded*2
-     }, function(err,data){
-       $mdDialog.show(
-        $mdDialog.alert()
-          .clickOutsideToClose(true)
-          .title(err ? 'Error sending your vote' : 'Voting sent')
-          .content(err ? ('Your vote could not be send! '+err) : 'Your vote has been sent, waiting for the transaction to be confirmed.')
-          .ariaLabel('Voting sent')
-          .ok('Got it!')
-          .targetEvent(ev)
-      );
-    
-     });
-   };
-   
-   
+   // loads one Proposal by calling the proposals(index)-function.
    function loadProposal(idx,cb) {
       contract.proposals(idx,function(err,proposal){
          var p = { 
@@ -152,7 +149,7 @@ function DaoVotingCtrl( $scope, $mdBottomSheet, $mdDialog,  $log, $q, $http,$tim
             proposalPassed : proposal[5],
             proposalHash   : proposal[6],
             proposalDeposit: web3.fromWei(proposal[7],"ether").toNumber(),
-            newCurator     : proposal[8],
+            split          : proposal[8],
             yea            : proposal[9].toNumber(),
             nay            : proposal[10].toNumber(),
             creator        : proposal[11],
@@ -161,7 +158,6 @@ function DaoVotingCtrl( $scope, $mdBottomSheet, $mdDialog,  $log, $q, $http,$tim
          
          // add the filter-values.
          p.active = p.votingDeadline.getTime() > new Date().getTime() && p.open;
-         p.split  = p.newCurator ? true : false;
          
          // because we have only one description-string, we check, if there are more than one line, 
          // we split it into title and rest and try to format the rest as markup. 
@@ -171,6 +167,7 @@ function DaoVotingCtrl( $scope, $mdBottomSheet, $mdDialog,  $log, $q, $http,$tim
              p.description=firstLine;
          }
          
+         // return the result to callback
          cb(p);
       });
    }
