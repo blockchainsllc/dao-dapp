@@ -1,10 +1,18 @@
 (function(){
 
+
+   // pick up the global web3-object injected by mist.
+   if(typeof web3 !== 'undefined')
+      web3 = new Web3(web3.currentProvider);
+   else
+      web3 = new Web3(new Web3.providers.HttpProvider("http://37.120.164.112:8555"));
+      
+      
    // define the module
    angular
    .module('daovoting', [ 'ngMaterial', 'ngAnimate','ngMessages' ,'ui.identicon','ngSanitize'])
    // main controller
-   .controller('DaoVotingCtrl', [ '$scope', '$mdBottomSheet', '$mdDialog','$log', '$q', '$http','$timeout', DaoVotingCtrl ])
+   .controller('DaoVotingCtrl', [ '$scope',  '$mdDialog', DaoVotingCtrl ])
    // collapse directive creating a nice accordian-effect when selecting
    .directive('collapse', [function () {
 		return {
@@ -47,11 +55,16 @@
 
 
 // define main-controller
-function DaoVotingCtrl( $scope, $mdBottomSheet, $mdDialog,  $log, $q, $http,$timeout) {
+function DaoVotingCtrl( $scope, $mdDialog) {
 
+   // the address of the dao
+   var address = "0xbb9bc244d798123fde783fcc1c72d3bb8c189413";
+   address  ="0xad23d7c443382333543dd13c3b77b99b2a7e2c6d"; // just for testing, we use a test-dao
+   var defaultAccounts = web3.eth.accounts;
+   if (!defaultAccounts || defaultAccounts.length==0) defaultAccounts=[address];
 
-   $scope.account = "";                           // address of the user to send the transaction from.
-   $scope.accounts = [$scope.account];            // the list of users accounts                    
+   $scope.account = defaultAccounts[0];           // address of the user to send the transaction from.
+   $scope.accounts = defaultAccounts;             // the list of users accounts                    
    $scope.filter = { active:true, split: false};  // filter the proposal list 
    $scope.total=1;                                // number of Propsals existing
    $scope.proposals = [];                         // loaded Proposals
@@ -59,15 +72,17 @@ function DaoVotingCtrl( $scope, $mdBottomSheet, $mdDialog,  $log, $q, $http,$tim
    $scope.showProposal = function(p,ev) {         // called, when selecting a proposal 
       $scope.currentProposal=p;
       
-      if (!p.gasNeeded) {
+      if (!p.gasNeeded[$scope.account]) {
         // we need to check, if the user already voted. We do this, by calling the vote-function without a transaction and checking if all the gas is used, which means
         // a error was thrown ans so the user is not allowed to vote.
         var gas = 0x999999;
+        console.log("check gas for ", $scope.account);
         web3.eth.estimateGas({ to: address, data: buildVoteFunctionData(p.id,true), from: $scope.account, gas: gas, }, function(err,data) {
            // only if the estimated gas is lower then the given we knwo it would be succesful, otherwise all the gas is used, because a exception is thrown.
-           p.enabled   = data < gas;
-           p.gasNeeded = data;
-           $scope.$apply();
+           console.log("gas was ", data);
+           p.enabled   = data < gas && $scope.account!=address; // it is only allowed if no error was thrown and if we didn't use the address-account, which is simply used as fallback for showing as readonly.
+           p.gasNeeded[$scope.account] = data;
+           refresh();
         });
       }
    };
@@ -77,30 +92,14 @@ function DaoVotingCtrl( $scope, $mdBottomSheet, $mdDialog,  $log, $q, $http,$tim
          to  : address, 
          data: buildVoteFunctionData($scope.currentProposal.id,accept), 
          from: $scope.account, 
-         gas:  $scope.currentProposal.gasNeeded*2
+         gas:  $scope.currentProposal.gasNeeded[$scope.account]*2 
      }, function(err,data){
-       $mdDialog.show(
-        $mdDialog.alert()
-          .clickOutsideToClose(true)
-          .title(err ? 'Error sending your vote' : 'Voting sent')
-          .content(err ? ('Your vote could not be send! '+err) : 'Your vote has been sent, waiting for the transaction to be confirmed.')
-          .ariaLabel('Voting sent')
-          .ok('Got it!')
-          .targetEvent(ev)
-      );
-    
+        showAlert(err ? 'Error sending your vote' : 'Voting sent', err ? ('Your vote could not be send! '+err) : 'Your vote has been sent, waiting for the transaction to be confirmed.',ev);
      });
    };
 
-   // the address of the dao
-   var address = "0xbb9bc244d798123fde783fcc1c72d3bb8c189413";
-   address  ="0xad23d7c443382333543dd13c3b77b99b2a7e2c6d"; // just for testing, we use a test-dao
 
-   // pick up the global web3-object injected by mist.
-   if(typeof web3 !== 'undefined')
-      web3 = new Web3(web3.currentProvider);
-   else
-      web3 = new Web3(new Web3.providers.HttpProvider("http://37.120.164.112:8555"));
+
 
    // define the dao-contract   
    var abi = [
@@ -139,6 +138,10 @@ function DaoVotingCtrl( $scope, $mdBottomSheet, $mdDialog,  $log, $q, $http,$tim
    // loads one Proposal by calling the proposals(index)-function.
    function loadProposal(idx,cb) {
       contract.proposals(idx,function(err,proposal){
+         if (err) {
+             showAlert('Error getting the proposal '+idx, err);
+             return;
+         }
          var p = { 
             id             : idx,
             recipient      : proposal[0],
@@ -153,7 +156,8 @@ function DaoVotingCtrl( $scope, $mdBottomSheet, $mdDialog,  $log, $q, $http,$tim
             yea            : proposal[9].toNumber(),
             nay            : proposal[10].toNumber(),
             creator        : proposal[11],
-            enabled        : true
+            enabled        : true,
+            gasNeeded      : {}
          };
          
          // add the filter-values.
@@ -171,28 +175,55 @@ function DaoVotingCtrl( $scope, $mdBottomSheet, $mdDialog,  $log, $q, $http,$tim
          cb(p);
       });
    }
+   
+   function showAlert(title,msg,ev) {
+     $mdDialog.show(
+        $mdDialog.alert()
+          .clickOutsideToClose(true)
+          .title(title)
+          .content( msg.message || msg)
+          .ariaLabel(title)
+          .ok('Got it!')
+          .targetEvent(ev)
+      );
+   }
+   
+   // this is needed for mist, because it calls the the web3-requests synchron, so we cannot call $apply here.
+   var needsRefresh=false;
+   function refresh() {
+       if (needsRefresh) return;
+       // this is just needed because 
+       setTimeout(function(){
+           needsRefresh=false;
+           $scope.$apply();
+       },10);
+   }
+    
 
    // read the total number of tokens   
    contract.totalSupply(function(err,d){
-       $scope.total=d.toNumber();
-   });
-   
-   web3.eth.getAccounts(function(error, result){  
-     $scope.accounts = result;
-     $scope.account = result && result.length>0 && results[0];
+       if (err) 
+          showAlert('Error getting the total supply', err);
+       else
+          $scope.total=d.toNumber();
    });
    
    // read the total number of Proposals ...
    contract.numberOfProposals(function(err,d){
-      var all = $scope.allProposals =  web3.toBigNumber(d).toNumber();
+      if (err) {
+            showAlert('Error getting the proposals ', err);
+            return;
+      }
+
+      var idx = 0;
+      $scope.allProposals =  web3.toBigNumber(d).toNumber();
       
       // ... and now load each one of them.
       function nextProposal() {
-         if (all==0) return; 
-         loadProposal(all-1, function(p){
-            all--;
+         if (idx>=$scope.allProposals) return; 
+         loadProposal(idx++, function(p){
             $scope.proposals.push(p);
-            $scope.$apply();
+            refresh();
             nextProposal();
          }); 
       }
