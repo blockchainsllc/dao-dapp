@@ -1,5 +1,5 @@
 .oldProposal {
-   background-color:#dddddd;
+   background-color:#ffffff;
 }
 .newProposal {
    background-color:#ffffff;
@@ -106,4 +106,13 @@ md-list-item-text {
 }
 .md-toolbar-tools .md-label {
     color:black
+}
+
+.ptabs {
+  background-color: rgb(33,150,243);
+}
+
+md-tabs.md-default-theme, md-tabs md-ink-bar {
+    color: red !important;
+    background: red  !important;
 }

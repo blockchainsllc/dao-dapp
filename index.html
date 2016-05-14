@@ -25,14 +25,10 @@
             <h2><span>Proposals</span></h2>
             <span flex> </span>
             <span layout="row" style="font-size:12px" class="centeredRow">
-                <md-radio-group ng-model="filter.active" layout="row"  class="centeredRow">
-                    <md-radio-button ng-value="true" >current ( {{(proposals | filter:{active:true}).length}} )</md-radio-button>
-                    <md-radio-button ng-value="false"> old ( {{(proposals | filter:{active:false}).length}} )</md-radio-button>
-                </md-radio-group>
-                <md-radio-group ng-model="filter.split" layout="row" class="centeredRow">
-                    <md-radio-button ng-value="false" >Proposal ( {{(proposals | filter:{split:false}).length}} )</md-radio-button>
-                    <md-radio-button ng-value="true"> Split ( {{(proposals | filter:{split:true}).length}} )</md-radio-button>
-                </md-radio-group>
+                <md-switch ng-model="filter.split" aria-label="Split" >
+                    <span style="color:white">Splits</span>
+                </md-switch>
+  
                 <div layout="row" ng-show="accounts && accounts.length>1" class="centeredRow">
                     <md-select ng-model="account">
                         <md-option ng-repeat="entry in accounts" value="{{entry}}">{{entry}}</md-option>
@@ -41,8 +37,13 @@
             </span>
 
          </div>
-
       </md-toolbar>
+    <div class="ptabs">
+        <md-tabs flex>
+        <md-tab label="Current ({{(proposals | filter:{active:true}).length}})" md-on-select="filter.active=true"></md-tab>
+        <md-tab label="Previous ({{(proposals | filter:{split:true}).length}})" md-on-select="filter.active=false"></md-tab>
+    </md-tabs>
+    </div>
       <md-content >
          <md-list>
             <md-list-item class="{{p.active?'newProposal':'oldProposal'}}" ng-repeat="p in proposals | filter:filter:strict">
