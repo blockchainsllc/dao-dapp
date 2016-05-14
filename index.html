@@ -73,11 +73,10 @@
                             </div>
                             
                             <div ng-show="!p.open" layout="row" flex>
-                               <div flex="10">Passed with :</div>
-                               <div> 
+                               <div layout="row" flex><div class="plabel">Passed: </div><div  class="pvalue">
                                  <span ng-show="p.propoalPassed" style="color:green;font-size:12px">Yes</span>
                                  <span ng-show="!p.propoalPassed" style="color:red;font-size:12px">No</span>
-                               </div>
+                               </div></div>
                              
                             </div>
                             
