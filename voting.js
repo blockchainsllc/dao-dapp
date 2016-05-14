@@ -13,6 +13,16 @@
    .module('daovoting', [ 'ngMaterial', 'ngAnimate','ngMessages' ,'ui.identicon','ngSanitize'])
    // main controller
    .controller('DaoVotingCtrl', [ '$scope',  '$mdDialog', DaoVotingCtrl ])
+   
+   // format number
+   .filter('ethnumber', function() {
+      return function(val) {
+        if (val > 1000000) return web3.toBigNumber(val/1000000).toFixed(2)+" M";
+        else if (val > 1000) return web3.toBigNumber(val/1000).toFixed(2)+" K";
+        return web3.toBigNumber(val).toFixed(2);
+      };
+    })
+
    // collapse directive creating a nice accordian-effect when selecting
    .directive('collapse', [function () {
 		return {
@@ -26,7 +36,7 @@
 					var newHeight = collapse ? 2 : getElementAutoHeight();
 					element.style.height = newHeight + 'px';
           element.style.opacity = collapse ? 0 : 1;
-          element.style.transform = "scaleY("+(collapse ? 2.1 : 1)+")";
+          element.style.transform = "scaleY("+(collapse ? 0.4 : 1)+")";
           element.style.pointerEvents= collapse ? 'none': 'auto';
 					ngElement.toggleClass('collapsed', collapse);
 				});
@@ -49,7 +59,7 @@
    // config theme
    .config(function($mdThemingProvider){
       $mdThemingProvider.theme('default')
-      .primaryPalette('blue-grey')
+      .primaryPalette('blue')
       .accentPalette('red');
    }) ;
 
@@ -66,7 +76,7 @@ function DaoVotingCtrl( $scope, $mdDialog) {
    $scope.account = defaultAccounts[0];           // address of the user to send the transaction from.
    $scope.accounts = defaultAccounts;             // the list of users accounts                    
    $scope.filter = { active:true, split: false};  // filter the proposal list 
-   $scope.total=1;                                // number of Propsals existing
+   $scope.total=1;                                // total Supply
    $scope.proposals = [];                         // loaded Proposals
    
    $scope.showProposal = function(p,ev) {         // called, when selecting a proposal 
@@ -83,6 +93,7 @@ function DaoVotingCtrl( $scope, $mdDialog) {
            p.enabled   = data < gas && $scope.account!=address; // it is only allowed if no error was thrown and if we didn't use the address-account, which is simply used as fallback for showing as readonly.
            p.gasNeeded[$scope.account] = data;
            refresh();
+           
         });
       }
    };
@@ -120,6 +131,10 @@ function DaoVotingCtrl( $scope, $mdDialog) {
        {"type":"uint256","name":""}],"inputs":[],"constant":true},
     {name:'minQuorumDivisor',"type":"function","outputs":[
        {"type":"uint256","name":""}],"inputs":[],"constant":true},
+    {name:'actualBalance',"type":"function","outputs":[
+       {"type":"uint256","name":""}],"inputs":[],"constant":true},
+    {name:'rewardToken', "constant":true,"inputs":[{"name":"","type":"address"}],"outputs":[
+       {"name":"","type":"uint256"}],"type":"function"},       
     {name:"vote", "type":"function","outputs":[
        {"type":"uint256","name":"_voteID"}],"inputs":[
        {"type":"uint256","name":"_proposalID"}, 
@@ -153,12 +168,20 @@ function DaoVotingCtrl( $scope, $mdDialog) {
             proposalHash   : proposal[6],
             proposalDeposit: web3.fromWei(proposal[7],"ether").toNumber(),
             split          : proposal[8],
-            yea            : proposal[9].toNumber(),
-            nay            : proposal[10].toNumber(),
+            yea            : web3.fromWei(proposal[9],"ether").toNumber(),
+            nay            : web3.fromWei(proposal[10],"ether").toNumber(),
             creator        : proposal[11],
             enabled        : true,
+            minQuroum      : function() {
+              var totalInWei = web3.toWei($scope.total,"ether");
+              return  web3.fromWei( 
+                totalInWei / $scope.minQuorumDivisor + 
+                ( web3.toWei(this.amount,"ether")   * totalInWei) / (3 * ($scope.actualBalance + $scope.rewardToken)),"ether");
+            },
             gasNeeded      : {}
+            
          };
+
          
          // add the filter-values.
          p.active = p.votingDeadline.getTime() > new Date().getTime() && p.open;
@@ -204,8 +227,18 @@ function DaoVotingCtrl( $scope, $mdDialog) {
    contract.totalSupply(function(err,d){
        if (err) 
           showAlert('Error getting the total supply', err);
-       else
-          $scope.total=d.toNumber();
+       else {
+          $scope.total=web3.fromWei(d,"ether").toNumber();
+          contract.minQuorumDivisor(function(err,minq){
+            $scope.minQuorumDivisor =  minq.toNumber() || 5;
+            contract.actualBalance(function(err,bal){
+                $scope.actualBalance = bal.toNumber();
+                contract.rewardToken(address,function(err,r){
+                    $scope.rewardToken = r.toNumber();
+                });
+            });
+          });
+       }
    });
    
    // read the total number of Proposals ...

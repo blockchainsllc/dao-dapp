@@ -21,6 +21,7 @@
       <md-progress-linear md-mode="determinate" value="{{proposals.length*100/allProposals}}"></md-progress-linear>
       <md-toolbar class="md-theme-light" >
          <div class="md-toolbar-tools">
+            <img src="logo.png" style="height:20px; padding-right:8px"/>
             <h2><span>Proposals</span></h2>
             <span flex> </span>
             <span layout="row" style="font-size:12px" class="centeredRow">
@@ -34,9 +35,7 @@
                 </md-radio-group>
                 <div layout="row" ng-show="accounts && accounts.length>1" class="centeredRow">
                     <md-select ng-model="account">
-                        <md-option ng-repeat="entry in accounts" value="{{entry}}">
-                            {{entry}}
-                        </md-option>
+                        <md-option ng-repeat="entry in accounts" value="{{entry}}">{{entry}}</md-option>
                     </md-select>
                 </div>
             </span>
@@ -49,21 +48,27 @@
             <md-list-item class="{{p.active?'newProposal':'oldProposal'}}" ng-repeat="p in proposals | filter:filter:strict">
                 <identicon username="p.creator" size="48" class="face noselect" ng-click="showProposal(p)"></identicon>
                 <div class="md-list-item-text" flex>
-                    <h3 class="desc noselect" ng-click="showProposal(p)">{{p.description}}</h3>
-                    <div layout="row" flex>
-                        <div flex="10" ng-show="!p.split">Amount:</div><div ng-show="!p.split"><b> {{p.amount | number:2 }} </b>ETH</div>
+                    <div flex layout="row" class="headline">
+                        <div class="desc noselect" ng-click="showProposal(p)">{{p.description}}
+                            <div class="date">{{p.votingDeadline.toLocaleDateString()}}</div> 
+                        </div>
                         <div flex> </div>
-                        <div class="date">ends: {{p.votingDeadline.toLocaleDateString()}}</div>
+                        <div ng-show="!p.split">
+                            <div class="amount">{{p.amount | ethnumber}}</div>
+                            <div class="eth">ETH</div>
+                        </div>
                     </div>
                     <div ng-bind-html="p.descriptionHTML">test</div>
                     <div class="slideDown" collapse="currentProposal!==p" style="display:none">
                         <div>
-                            <div layout="row" flex><div flex="10">Creator: </div><div > {{ p.creator }} </div></div>                                
-                            <div layout="row" flex><div flex="10">Recipient: </div><div > {{ p.recipient }} </div>      </div>                          
-                            <div layout="row" flex><div flex="10">Deposit: </div><div > {{ p.proposalDeposit | number:2 }} ETH </div>     </div>                           
+                            <div layout="row" flex><div class="plabel">ID: </div><div  class="pvalue"> {{ p.id }} </div></div>                                
+                            <div layout="row" flex><div class="plabel">Creator: </div><div class="pvalue" flex> {{ p.creator }} </div></div>                                
+                            <div layout="row" flex><div class="plabel">Recipient: </div><div class="pvalue" flex> {{ p.recipient }} </div>      </div>                          
+                            <div layout="row" flex><div class="plabel">Deposit: </div><div  class="pvalue" flex> {{ p.proposalDeposit | number:2 }} ETH </div>     </div>                           
+                            <div layout="row" flex><div class="plabel">Quroum: </div><div class="pvalue" flex> {{ (p.yea+p.nay)*100/total | number:2 }}% of {{ p.minQuroum()*100/total | number:2}}% </div>      </div>                          
                                 
-                            <div ng-show="p.split">
-                                This Proposal is requesting a new Curator; it will split The DAO to create it's own DAO. Voting Yes allows you to also Split. You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO.
+                            <div ng-show="p.split" class="ptext">
+                                This Proposal is requesting a new Curator. It will split The DAO to create it's own DAO. Voting Yes allows you to also Split. You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO.
                             </div>
                             
                             <div ng-show="!p.open" layout="row" flex>
@@ -76,17 +81,17 @@
                             </div>
                             
                             <div style="margin-top:20px" class="progressRow" layout="row" flex>
-                                 <div flex="10">Yes:</div>
-                                 <div flex="25">{{p.yea| number:0}}</div>
-                                 <div flex="8">({{p.yea*100/total | number:2}}%) &nbsp;</div>
+                                 <div class="plabel">Yes:</div>
                                  <md-progress-linear flex md-mode="determinate" value="{{p.yea*100/total}}"></md-progress-linear>
+                                 <div class="pnumber">{{p.yea | ethnumber}}</div>
+                                 <div class="pnumber">({{p.yea*100/total | number:2}}%) &nbsp;</div>
                             </div> 
                             
                             <div style="margin-bottom:20px" class="progressRow" layout="row" flex>
-                                 <div flex="10">No:</div>
-                                 <div flex="25">{{p.nay | number:0}}</div>
-                                 <div flex="8">({{p.nay*100/total | number:2}}%) &nbsp;</div>
+                                 <div class="plabel">No:</div>
                                  <md-progress-linear flex md-mode="determinate" value="{{p.nay*100/total}}"></md-progress-linear>
+                                 <div class="pnumber">{{p.nay | ethnumber}}</div>
+                                 <div class="pnumber">({{p.nay*100/total | number:2}}%) &nbsp;</div>
                             </div> 
                             
                             <div>

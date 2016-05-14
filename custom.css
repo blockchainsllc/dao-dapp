@@ -1,8 +1,8 @@
 .oldProposal {
-   background-color:#bbbbbb;
+   background-color:#dddddd;
 }
 .newProposal {
-   background-color:#eeeeee;
+   background-color:#ffffff;
 }
 
 .face {
@@ -14,7 +14,7 @@
 }
 
 .slideDown {
-    -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+  -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
   -moz-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
   -o-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
   transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
@@ -30,12 +30,49 @@ md-list-item {
 }
 
 .desc {
-  border-bottom-style: solid;
-  border-bottom-width: 1px;
-  border-bottom-color: #cccccc;
-  padding-bottom:5px;
+  padding-top:5px;
+  font-size: 18px;
+}
+.amount {
+  padding-top:5px;
+  padding-right:10px;
+  font-size: 24px;
+  line-height: 20px;
+}
+.eth {
+  color:#aaaaaa;
+  text-align: right;
+  font-size: 12px;
+  padding-right:10px;
+}
+.date {
+  font-size: 12px;
+  color: rgb(33,150,243);
+}
+.headline {
+  padding-top:10px;
+  padding-bottom:10px;
+}
+.plabel {
+  width:80px;
+  font-size: 12px;
+}
+.pnumber {
+  text-align:right;
+  width:70px;
+  font-size: 12px;
+
+}
+.pvalue {
+  text-overflow:ellipsis; 
+  overflow:hidden;
+  font-size: 12px;
 }
 
+.ptext {
+  padding-top:10px;
+  font-size: 12px;
+}
 
 .centeredRow {
   align-items: center !important;
@@ -69,8 +106,4 @@ md-list-item-text {
 }
 .md-toolbar-tools .md-label {
     color:black
-}
-
-.date {
-  padding-right: 10px;
 }
