@@ -161,7 +161,7 @@ function DaoVotingCtrl( $scope, $mdDialog) {
             id             : idx,
             recipient      : proposal[0],
             amount         : web3.fromWei(proposal[1],"ether").toNumber(),
-            description    : proposal[2],
+            description    : proposal[2].replace(/<br>/g, '\n').replace(/\\n/g, '\n'),
             votingDeadline : new Date(proposal[3].toNumber() * 1000),
             open           : proposal[4],
             proposalPassed : proposal[5],
@@ -248,12 +248,12 @@ function DaoVotingCtrl( $scope, $mdDialog) {
             return;
       }
 
-      var idx = 0;
+      var idx = 1;
       $scope.allProposals =  web3.toBigNumber(d).toNumber();
       
       // ... and now load each one of them.
       function nextProposal() {
-         if (idx>=$scope.allProposals) return; 
+         if (idx>$scope.allProposals) return; 
          loadProposal(idx++, function(p){
             $scope.proposals.push(p);
             refresh();

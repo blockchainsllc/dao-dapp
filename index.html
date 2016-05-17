@@ -41,7 +41,7 @@
     <div class="ptabs">
         <md-tabs flex>
         <md-tab label="Current ({{(proposals | filter:{active:true, split:filter.split}).length}})" md-on-select="filter.active=true"></md-tab>
-        <md-tab label="Previous ({{(proposals | filter:{split:true, split:filter.split}).length}})" md-on-select="filter.active=false"></md-tab>
+        <md-tab label="Previous ({{(proposals | filter:{active:false, split:filter.split}).length}})" md-on-select="filter.active=false"></md-tab>
     </md-tabs>
     </div>
       <md-content >
@@ -59,8 +59,8 @@
                             <div class="eth">ETH</div>
                         </div>
                     </div>
-                    <div ng-bind-html="p.descriptionHTML">test</div>
                     <div class="slideDown" collapse="currentProposal!==p" style="display:none">
+                        <div ng-bind-html="p.descriptionHTML">test</div>
                         <div>
                             <div layout="row" flex><div class="plabel">ID: </div><div  class="pvalue"> {{ p.id }} </div></div>                                
                             <div layout="row" flex><div class="plabel">Creator: </div><div class="pvalue" flex> {{ p.creator }} </div></div>                                
