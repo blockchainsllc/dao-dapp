@@ -1,3 +1,16 @@
+import Web3 from 'web3';
+import marked from 'marked';
+import angular from 'angular';
+import ngMaterial from 'angular-material';
+import ngAnimate from 'angular-animate';
+import ngMessages from 'angular-messages';
+import ngSanitize from 'angular-sanitize';
+import Identicon from 'identicon.js/identicon';
+window.Identicon = Identicon;
+import 'angular-identicon/dist/angular-identicon';
+
+var web3 = window.web3;
+
 (function(){
 
 
@@ -10,7 +23,7 @@
       
    // define the module
    angular
-   .module('daovoting', [ 'ngMaterial', 'ngAnimate','ngMessages' ,'ui.identicon','ngSanitize'])
+   .module('daovoting', [ ngMaterial, ngAnimate, ngMessages, 'ui.identicon', ngSanitize])
    // main controller
    .controller('DaoVotingCtrl', [ '$scope',  '$mdDialog', DaoVotingCtrl ])
    
