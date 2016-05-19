@@ -13,6 +13,7 @@
     "angular-messages": "^1.5.5",
     "angular-sanitize": "^1.5.5",
     "bootstrap": "^3.3.6",
+    "identicon.js": "^1.2.1",
     "jquery": "^2.2.3",
     "marked": "^0.3.5",
     "underscore": "^1.8.3",
@@ -23,6 +24,7 @@
     "babel-loader": "^6.2.4",
     "babel-preset-es2015": "^6.9.0",
     "css-loader": "^0.23.1",
+    "extract-text-webpack-plugin": "^1.0.1",
     "file-loader": "^0.8.5",
     "json-loader": "^0.5.4",
     "style-loader": "^0.13.1",
@@ -31,7 +33,7 @@
     "webpack-dev-server": "^1.14.1"
   },
   "scripts": {
-    "start": "webpack-dev-server --inline --progress --colors --port 3000",
+    "start": "webpack-dev-server --inline --progress --colors --hot --port 3000",
     "build": "NODE_ENV=production webpack --colors --progress"
   },
   "repository": {

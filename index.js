@@ -1,4 +1,5 @@
 import './index.html';
+import './logo.png';
 
 import './custom.css';
 import 'bootstrap/dist/css/bootstrap.css';
