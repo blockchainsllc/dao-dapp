@@ -7,6 +7,33 @@
    else
       web3 = new Web3(new Web3.providers.HttpProvider("http://37.120.164.112:8555"));
       
+
+   if (typeof mist !== 'undefined' && mist.mode === 'mist') {
+    var headerElement = document.getElementsByTagName('md-toolbar');
+    if (headerElement[0]) 
+      headerElement[0].style.paddingTop = "55px";
+
+    // add/update mist menu
+    mist.menu.clear();
+    mist.menu.add('current',{
+        position: 0,
+        name: "Current Proposals",
+        badge: 10,
+        selected: true
+    }, function(){
+        // action menu 1
+    });    
+    mist.menu.add('previous',{
+        position: 1,
+        name: "Previous Proposals",
+        badge: 0,
+        selected: false
+    }, function(){
+        // action menu 2
+    });
+
+        
+   }      
       
    // define the module
    angular
