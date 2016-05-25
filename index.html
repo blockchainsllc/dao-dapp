@@ -10,6 +10,7 @@
       <link rel="stylesheet" href="custom.css"/>
       <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
       <link rel="stylesheet" href="bower_components/angular-material/angular-material.css"/>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />      
       <script src="bower_components/web3/dist/web3.js"></script>
    </head>
 
@@ -40,15 +41,15 @@
          </div>
       </md-toolbar>
     <div class="ptabs" layout="row">
-        <div flex layout="row" layout-align="start end"><md-tabs flex layout-align="start end">
-           <md-tab md-active="filter.active"  label="Current ({{(proposals | filter:{active:true, split:filter.split, content:filter.content}).length}})"   md-on-select="filter.active=true"></md-tab>
-           <md-tab md-active="!filter.active" label="Previous ({{(proposals | filter:{active:false, split:filter.split, content:filter.content}).length}})" md-on-select="filter.active=false"></md-tab>
-       </md-tabs>
+        <div flex layout="row" layout-align="start end" style="min-width:200px">
+            <md-tabs flex layout-align="start end">
+                <md-tab md-active="filter.active"  label="Current ({{(proposals | filter:{active:true, split:filter.split, content:filter.content}).length}})"   md-on-select="filter.active=true"></md-tab>
+                <md-tab md-active="!filter.active" label="Previous ({{(proposals | filter:{active:false, split:filter.split, content:filter.content}).length}})" md-on-select="filter.active=false"></md-tab>
+            </md-tabs>
         </div>
-       <div flex></div>
-        <md-input-container >
-            <label style="color:white">Search</label>
-            <input style="color:white" ng-model="filter.content">
+        <md-input-container style="padding-bottom:2px;margin-top:0px" class="pwhite md-block">
+            <md-icon style="color:white">search</md-icon>
+            <input placeholder="Search" style="color:white;width:140px" ng-model="filter.content">
         </md-input-container>
     </div>
       <md-content >

@@ -75,13 +75,14 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
    var defaultAccounts = web3.eth.accounts;
    if (!defaultAccounts || defaultAccounts.length==0) defaultAccounts=[address];
 
-   $scope.account = defaultAccounts[0];           // address of the user to send the transaction from.
-   $scope.accounts = defaultAccounts;             // the list of users accounts                    
-   $scope.filter = { active:true, split: false};  // filter the proposal list 
-   $scope.total=1;                                // total Supply
-   $scope.proposals = [];                         // loaded Proposals
+   $scope.account  = defaultAccounts[0];            // address of the user to send the transaction from.
+   $scope.accounts = defaultAccounts;               // the list of users accounts                    
+   $scope.filter   = { active:true, split: false};  // filter the proposal list 
+   $scope.total    = 1;                             // total Supply
+   $scope.proposals = [];                           // loaded Proposals
    
-   $scope.showProposal = function(p,ev) {         // called, when selecting a proposal 
+   // called, when selecting a proposal 
+   $scope.showProposal = function(p,ev) {           
       $scope.currentProposal=p;
       
       // if this proposal was taken from the cache we need to load the current values
@@ -91,10 +92,8 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
         // we need to check, if the user already voted. We do this, by calling the vote-function without a transaction and checking if all the gas is used, which means
         // a error was thrown ans so the user is not allowed to vote.
         var gas = 0x999999;
-        console.log("check gas for ", $scope.account);
         web3.eth.estimateGas({ to: address, data: buildVoteFunctionData(p.id,true), from: $scope.account, gas: gas, }, function(err,data) {
            // only if the estimated gas is lower then the given we knwo it would be succesful, otherwise all the gas is used, because a exception is thrown.
-           console.log("gas was ", data);
            p.enabled   = data < gas && $scope.account!=address; // it is only allowed if no error was thrown and if we didn't use the address-account, which is simply used as fallback for showing as readonly.
            p.gasNeeded[$scope.account] = data;
            refresh();
@@ -102,6 +101,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
       }
    };
    
+   // when the user clicks the vote-buttons
    $scope.sendVotingTransaction = function(ev, accept) {
      web3.eth.sendTransaction({
          to  : address, 
@@ -110,13 +110,13 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
          gas:  $scope.currentProposal.gasNeeded[$scope.account]*2 
      }, function(err,data){
         if (!err) {
+          // disable the buttons
           $scope.currentProposal.enabled=false;
           refresh();
         }
         showAlert(err ? 'Error sending your vote' : 'Voting sent', err ? ('Your vote could not be send! '+err) : 'Your vote has been sent, waiting for the transaction to be confirmed.',ev);
      });
    };
-
 
    // define the dao-contract   
    var abi = [
@@ -148,7 +148,6 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
     {name:"numberOfProposals","type":"function","outputs":[
       {"type":"uint256","name":"_numberOfProposals"}],"inputs":[],"constant":true}
    ];
-
    var contract = web3.eth.contract(abi).at(address);
 
    // builds the data for the vote-function   
@@ -156,6 +155,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
       return contract.vote.getData(proposal, supports);
    }
 
+   // helper function to show a alert.
    function showAlert(title,msg,ev) {
      $mdDialog.show(
         $mdDialog.alert()
@@ -179,7 +179,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
        },10);
    }
    
-   // cache results
+   // cache results in the local storage
    function updateCache(p) {
      cachedProposals[p.id-1]=p.data;
      if (localStorage) localStorage.setItem(address,JSON.stringify(cachedProposals));
@@ -190,7 +190,8 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
    });
 
 
-   function createProposal(idx,proposal, fromCache) {
+   // creates a proposal-object from the data delivered by the web3-object
+   function createProposal(idx, proposal, fromCache) {
      var p = { 
         id             : idx,
         recipient      : proposal[0],
@@ -221,14 +222,23 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
       // add the filter-values.
       p.active = p.votingDeadline.getTime() > new Date().getTime() && p.open;
       
+      // if the description contains JSON, we take the fields from there
+      if (p.description.indexOf('{')==0) {
+        var meta = JSON.parse(p.description);
+        p.description = meta.title;
+        p.descriptionHTML = marked(meta.description || "");
+        if (p.url) p.descriptionHTML+='<p><a href="'+p.url+'" target="_new">more<a></p>';
+      }
+       
       // because we have only one description-string, we check, if there are more than one line, 
-      // we split it into title and rest and try to format the rest as markup. 
+      // we split it into title and rest and try to format the rest as markup.
       if (p.description.indexOf('\n')>0) {
           var firstLine = p.description.substring(0,p.description.indexOf('\n'));
           p.descriptionHTML = marked(p.description.substring(firstLine.length+1));
           p.description=firstLine;
       }
-      
+
+      // if the proposal is already loaded, we want replace the values of it.      
       var existing = $scope.proposals[idx-1];
       if (existing) {
          for(var k in p) {
@@ -249,7 +259,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
          }
          
          var p = createProposal(idx,proposal);
-         
+         // store it in the local storagfe
          updateCache(p);
          // return the result to callback
          cb(p);

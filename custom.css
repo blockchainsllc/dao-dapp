@@ -117,3 +117,7 @@ md-tabs.md-default-theme, md-tabs md-ink-bar {
     color: red !important;
     background: red  !important;
 }
+
+.pwhite * {
+  color:white !important;
+}
