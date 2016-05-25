@@ -243,8 +243,6 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
           p.description=firstLine;
       }
       
-      p.descriptionHTML="asdasd<br>asdasd<br>asdasd<br>asdasd<br>asdasd<br>asdasd<br>asdasd<br>asdasd<br>234234234asdasd<br>asdasd<br>asdasd<br>2344234asdasd<br>asdasd<br>asdasd<br>354243";
-
       // if the proposal is already loaded, we want replace the values of it.      
       var existing = $scope.proposals[idx-1];
       if (existing) {
