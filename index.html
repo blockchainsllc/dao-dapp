@@ -54,20 +54,23 @@
     </div>
       <md-content >
          <md-list>
-            <md-list-item class="{{p.active?'newProposal':'oldProposal'}}" ng-repeat="p in proposals | filter:filter:strict">
-                <identicon username="p.creator" size="48" class="face noselect" ng-click="showProposal(p)"></identicon>
-                <div class="md-list-item-text" flex>
-                    <div flex layout="row" class="headline">
-                        <div class="desc noselect" ng-click="showProposal(p)">{{p.description}}
-                            <div class="date">{{p.votingDeadline.toLocaleDateString()}}</div> 
-                        </div>
-                        <div flex> </div>
-                        <div ng-show="!p.split">
-                            <div class="amount">{{p.amount | ethnumber}}</div>
-                            <div class="eth">ETH</div>
+            <md-list-item class="{{p.active?'newProposal':'oldProposal'}}" ng-repeat="p in proposals | filter:filter:strict" layout="column">
+                <div layout="row" style="width:100%">
+                    <identicon username="p.creator" size="48" class="face noselect" ng-click="showProposal(p)"></identicon>
+                    <div class="md-list-item-text" flex>
+                        <div flex layout="row" class="headline">
+                            <div class="desc noselect" ng-click="showProposal(p)">{{p.description}}
+                                <div class="date">{{p.votingDeadline.toLocaleDateString()}}</div> 
+                            </div>
+                            <div flex> </div>
+                            <div ng-show="!p.split">
+                                <div class="amount">{{p.amount | ethnumber}}</div>
+                                <div class="eth">ETH</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="slideDown" collapse="currentProposal!==p" style="display:none">
+                 </div>
+                    <div class="slideDown" collapse="currentProposal!==p" style="display:none;width:100%" layout="column" flex>
                         <div ng-bind-html="p.descriptionHTML">test</div>
                         <div>
                             <div layout="row" flex><div class="plabel">ID: </div><div  class="pvalue"> {{ p.id }} </div></div>                                
@@ -107,8 +110,7 @@
                               <md-button class="md-raised md-primary"  ng-disabled="!p.enabled" ng-click="sendVotingTransaction($event,false)">NO</md-button>
                             </div>
                         </div>
-                    </div>            
-                </div>
+                    </div>                 
             </md-list-item>
          </md-list>
       </md-content>

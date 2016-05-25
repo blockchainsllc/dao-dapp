@@ -19,6 +19,14 @@
   -o-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
   transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
   pointer-events : none;
+  width: 100%;
+  padding-left: 80px; 
+}
+
+@media only screen and (max-width: 500px) {
+    .slideDown {
+         padding-left: 15px;
+    }
 }
 
 md-list-item {
