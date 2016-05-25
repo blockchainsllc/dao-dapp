@@ -41,8 +41,8 @@
       </md-toolbar>
     <div class="ptabs">
         <md-tabs flex>
-        <md-tab label="Current ({{(proposals | filter:{active:true, split:filter.split}).length}})" md-on-select="filter.active=true"></md-tab>
-        <md-tab label="Previous ({{(proposals | filter:{active:false, split:filter.split}).length}})" md-on-select="filter.active=false"></md-tab>
+        <md-tab md-active="filter.active" label="Current ({{(proposals | filter:{active:true, split:filter.split}).length}})" md-on-select="filter.active=true"></md-tab>
+        <md-tab md-active="!filter.active" label="Previous ({{(proposals | filter:{active:false, split:filter.split}).length}})" md-on-select="filter.active=false"></md-tab>
     </md-tabs>
     </div>
       <md-content >

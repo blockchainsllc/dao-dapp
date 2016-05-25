@@ -13,7 +13,7 @@
    angular
    .module('daovoting', [ 'ngMaterial', 'ngAnimate','ngMessages' ,'ui.identicon','ngSanitize'])
    // main controller
-   .controller('DaoVotingCtrl', [ '$scope',  '$mdDialog', DaoVotingCtrl ])
+   .controller('DaoVotingCtrl', [ '$scope',  '$mdDialog', '$parse', '$filter', DaoVotingCtrl ])
    
    // format number
    .filter('ethnumber', function() {
@@ -66,7 +66,7 @@
 
 
 // define main-controller
-function DaoVotingCtrl( $scope, $mdDialog) {
+function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
 
    // the address of the dao
    var address = "0xbb9bc244d798123fde783fcc1c72d3bb8c189413";
@@ -262,6 +262,8 @@ function DaoVotingCtrl( $scope, $mdDialog) {
          }); 
       }
       
+      
+      
       nextProposal();
    });
    
@@ -273,27 +275,44 @@ function DaoVotingCtrl( $scope, $mdDialog) {
     if (headerElement[0]) 
       headerElement[0].style.paddingTop = "55px";
 
+
+
+
     // add/update mist menu
-    mist.menu.clear();
-    mist.menu.add('current',{
+    var currentEntry = {
         position: 0,
         name: "Current Proposals",
-        badge: 10,
+        badge: 0,
         selected: true
-    }, function(){
-        $scope.filter.active=true;
-        refresh();
-    });    
-    mist.menu.add('previous',{
+    }, prevEntry= {
         position: 1,
         name: "Previous Proposals",
         badge: 0,
         selected: false
-    }, function(){
-        $scope.filter.active=false;
-        refresh();
-    });
+    };
+    mist.menu.clear();
+    
 
+    // update the entries    
+    
+    function updateEntries() {
+      currentEntry.badge    = $filter('filter')($scope.proposals, {active:true, split:$scope.filter.split} ).length;
+      prevEntry.badge       = $filter('filter')($scope.proposals, {active:false, split:$scope.filter.split} ).length;
+      currentEntry.selected = $scope.filter.active;
+      prevEntry.selected    = !$scope.filter.active;
+      mist.menu.add('current', currentEntry, function(){
+          $scope.filter.active=true;
+          refresh();
+      });    
+      mist.menu.add('previous', prevEntry, function(){
+          $scope.filter.active=false;
+          refresh();
+      });
+    }
+    $scope.$watch('filter.active', updateEntries);
+    $scope.$watch('filter.split', updateEntries);
+    $scope.$watch('proposals.length', updateEntries);
+    updateEntries();
         
    }         
    
