@@ -39,11 +39,17 @@
 
          </div>
       </md-toolbar>
-    <div class="ptabs">
-        <md-tabs flex>
-        <md-tab md-active="filter.active" label="Current ({{(proposals | filter:{active:true, split:filter.split}).length}})" md-on-select="filter.active=true"></md-tab>
-        <md-tab md-active="!filter.active" label="Previous ({{(proposals | filter:{active:false, split:filter.split}).length}})" md-on-select="filter.active=false"></md-tab>
-    </md-tabs>
+    <div class="ptabs" layout="row">
+        <div flex layout="row" layout-align="start end"><md-tabs flex layout-align="start end">
+           <md-tab md-active="filter.active"  label="Current ({{(proposals | filter:{active:true, split:filter.split, content:filter.content}).length}})"   md-on-select="filter.active=true"></md-tab>
+           <md-tab md-active="!filter.active" label="Previous ({{(proposals | filter:{active:false, split:filter.split, content:filter.content}).length}})" md-on-select="filter.active=false"></md-tab>
+       </md-tabs>
+        </div>
+       <div flex></div>
+        <md-input-container >
+            <label style="color:white">Search</label>
+            <input style="color:white" ng-model="filter.content">
+        </md-input-container>
     </div>
       <md-content >
          <md-list>

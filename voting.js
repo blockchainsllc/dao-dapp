@@ -69,8 +69,9 @@
 function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
 
    // the address of the dao
-   var address = "0xbb9bc244d798123fde783fcc1c72d3bb8c189413";
-   address  ="0x159fe90ac850c895e4fd144e705923cfa042d974"; // just for testing, we use a test-dao
+   var address = window.location.hash.length>40 ?  window.location.hash.substring(1) : "0xbb9bc244d798123fde783fcc1c72d3bb8c189413";
+   if (address.indexOf("0x")<0) address="0x"+address;
+//   address  ="0x159fe90ac850c895e4fd144e705923cfa042d974"; // just for testing, we use a test-dao
    var defaultAccounts = web3.eth.accounts;
    if (!defaultAccounts || defaultAccounts.length==0) defaultAccounts=[address];
 
@@ -83,6 +84,9 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
    $scope.showProposal = function(p,ev) {         // called, when selecting a proposal 
       $scope.currentProposal=p;
       
+      // if this proposal was taken from the cache we need to load the current values
+      if (p.needsUpdate) loadProposal(p.id, refresh); 
+         
       if (!p.gasNeeded[$scope.account]) {
         // we need to check, if the user already voted. We do this, by calling the vote-function without a transaction and checking if all the gas is used, which means
         // a error was thrown ans so the user is not allowed to vote.
@@ -112,8 +116,6 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
         showAlert(err ? 'Error sending your vote' : 'Voting sent', err ? ('Your vote could not be send! '+err) : 'Your vote has been sent, waiting for the transaction to be confirmed.',ev);
      });
    };
-
-
 
 
    // define the dao-contract   
@@ -154,55 +156,6 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
       return contract.vote.getData(proposal, supports);
    }
 
-   // loads one Proposal by calling the proposals(index)-function.
-   function loadProposal(idx,cb) {
-      contract.proposals(idx,function(err,proposal){
-         if (err) {
-             showAlert('Error getting the proposal '+idx, err);
-             return;
-         }
-         var p = { 
-            id             : idx,
-            recipient      : proposal[0],
-            amount         : web3.fromWei(proposal[1],"ether").toNumber(),
-            description    : proposal[2].replace(/<br>/g, '\n').replace(/\\n/g, '\n'),
-            votingDeadline : new Date(proposal[3].toNumber() * 1000),
-            open           : proposal[4],
-            proposalPassed : proposal[5],
-            proposalHash   : proposal[6],
-            proposalDeposit: web3.fromWei(proposal[7],"ether").toNumber(),
-            split          : proposal[8],
-            yea            : web3.fromWei(proposal[9],"ether").toNumber(),
-            nay            : web3.fromWei(proposal[10],"ether").toNumber(),
-            creator        : proposal[11],
-            enabled        : true,
-            minQuroum      : function() {
-              var totalInWei = web3.toWei($scope.total,"ether");
-              return  web3.fromWei( 
-                totalInWei / $scope.minQuorumDivisor + 
-                ( web3.toWei(this.amount,"ether")   * totalInWei) / (3 * ($scope.actualBalance + $scope.rewardToken)),"ether");
-            },
-            gasNeeded      : {}
-            
-         };
-
-         
-         // add the filter-values.
-         p.active = p.votingDeadline.getTime() > new Date().getTime() && p.open;
-         
-         // because we have only one description-string, we check, if there are more than one line, 
-         // we split it into title and rest and try to format the rest as markup. 
-         if (p.description.indexOf('\n')>0) {
-             var firstLine = p.description.substring(0,p.description.indexOf('\n'));
-             p.descriptionHTML = marked(p.description.substring(firstLine.length+1));
-             p.description=firstLine;
-         }
-         
-         // return the result to callback
-         cb(p);
-      });
-   }
-   
    function showAlert(title,msg,ev) {
      $mdDialog.show(
         $mdDialog.alert()
@@ -225,7 +178,84 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
            $scope.$apply();
        },10);
    }
-    
+   
+   // cache results
+   function updateCache(p) {
+     cachedProposals[p.id-1]=p.data;
+     if (localStorage) localStorage.setItem(address,JSON.stringify(cachedProposals));
+   }
+   var cachedProposals = localStorage && localStorage.getItem(address)? (JSON.parse(localStorage.getItem(address)) || []) : [];
+   cachedProposals.forEach(function(data,i) { 
+     $scope.proposals.push(createProposal(i+1,data,true)) 
+   });
+
+
+   function createProposal(idx,proposal, fromCache) {
+     var p = { 
+        id             : idx,
+        recipient      : proposal[0],
+        amount         : web3.fromWei(web3.toBigNumber(proposal[1]),"ether").toNumber(),
+        content        : proposal[2],
+        description    : proposal[2].replace(/<br>/g, '\n').replace(/\\n/g, '\n'),
+        votingDeadline : new Date(web3.toBigNumber(proposal[3]).toNumber() * 1000),
+        open           : proposal[4],
+        proposalPassed : proposal[5],
+        proposalHash   : proposal[6],
+        proposalDeposit: web3.fromWei(web3.toBigNumber(proposal[7]),"ether").toNumber(),
+        split          : proposal[8],
+        yea            : web3.fromWei(web3.toBigNumber(proposal[9]),"ether").toNumber(),
+        nay            : web3.fromWei(web3.toBigNumber(proposal[10]),"ether").toNumber(),
+        creator        : proposal[11],
+        enabled        : true,
+        minQuroum      : function() {
+          var totalInWei = web3.toWei($scope.total,"ether");
+          return  web3.fromWei( 
+            totalInWei / $scope.minQuorumDivisor + 
+            ( web3.toWei(this.amount,"ether")   * totalInWei) / (3 * ($scope.actualBalance + $scope.rewardToken)),"ether");
+        },
+        gasNeeded      : {},
+        data           : proposal,
+        needsUpdate    : fromCache ? true : false
+      };
+        
+      // add the filter-values.
+      p.active = p.votingDeadline.getTime() > new Date().getTime() && p.open;
+      
+      // because we have only one description-string, we check, if there are more than one line, 
+      // we split it into title and rest and try to format the rest as markup. 
+      if (p.description.indexOf('\n')>0) {
+          var firstLine = p.description.substring(0,p.description.indexOf('\n'));
+          p.descriptionHTML = marked(p.description.substring(firstLine.length+1));
+          p.description=firstLine;
+      }
+      
+      var existing = $scope.proposals[idx-1];
+      if (existing) {
+         for(var k in p) {
+           if (k!='enabled' && k!='gasNeeded') existing[k]=p[k]; 
+         }
+         p=existing;
+      }
+      
+      return p;
+   }
+
+   // loads one Proposal by calling the proposals(index)-function.
+   function loadProposal(idx,cb) {
+      contract.proposals(idx,function(err,proposal){
+         if (err) {
+             showAlert('Error getting the proposal '+idx, err);
+             return;
+         }
+         
+         var p = createProposal(idx,proposal);
+         
+         updateCache(p);
+         // return the result to callback
+         cb(p);
+      });
+   }
+   
 
    // read the total number of tokens   
    contract.totalSupply(function(err,d){
@@ -252,71 +282,71 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
             return;
       }
 
-      var idx = 1;
+      var idx = $scope.proposals.length+1;
       $scope.allProposals =  web3.toBigNumber(d).toNumber();
+      
+      // check if the proposal came from cache and needs to be updated
+      function nextReload(p) {
+        while (p && !p.needsUpdate) p=$scope.proposals[p.id];
+        if (p) loadProposal(p.id, nextReload);
+      }
       
       // ... and now load each one of them.
       function nextProposal() {
-         if (idx>$scope.allProposals) return; 
+         // after we read the missing, we read try to update the current ones as needed.
+         if (idx>$scope.allProposals) return nextReload($scope.proposals[0]); 
+            
          loadProposal(idx++, function(p){
-            $scope.proposals.push(p);
+            $scope.proposals[p.id-1]=p;
             refresh();
             nextProposal();
          }); 
       }
       
-      
-      
+      // first read all missing proposals
       nextProposal();
    });
    
    
    // init mist-menu
-
    if (typeof mist !== 'undefined' && mist.mode === 'mist') {
-    var headerElement = document.getElementsByTagName('md-toolbar');
-    if (headerElement[0]) 
-      headerElement[0].style.paddingTop = "55px";
-
-
-
-
-    // add/update mist menu
-    var currentEntry = {
-        position: 0,
-        name: "Current Proposals",
-        badge: 0,
-        selected: true
-    }, prevEntry= {
-        position: 1,
-        name: "Previous Proposals",
-        badge: 0,
-        selected: false
-    };
-    mist.menu.clear();
-    
+      var headerElement = document.getElementsByTagName('md-toolbar');
+      if (headerElement[0])  headerElement[0].style.paddingTop = "55px";
 
     // update the entries    
-    
     function updateEntries() {
-      currentEntry.badge    = $filter('filter')($scope.proposals, {active:true, split:$scope.filter.split} ).length;
-      prevEntry.badge       = $filter('filter')($scope.proposals, {active:false, split:$scope.filter.split} ).length;
-      currentEntry.selected = $scope.filter.active;
-      prevEntry.selected    = !$scope.filter.active;
-      mist.menu.add('current', currentEntry, function(){
+      mist.menu.add('current', {
+        position: 0,
+        name: "Current Proposals",
+        badge: $filter('filter')($scope.proposals, {active:true, split:$scope.filter.split, content:$scope.filter.content} ).length,
+        selected: $scope.filter.active
+      }, function(){
           $scope.filter.active=true;
           refresh();
       });    
-      mist.menu.add('previous', prevEntry, function(){
+      
+      mist.menu.add('previous', {
+        position: 1,
+        name: "Previous Proposals",
+        badge:  $filter('filter')($scope.proposals, {active:false, split:$scope.filter.split, content:$scope.filter.content} ).length,
+        selected: !$scope.filter.active
+      }, function(){
           $scope.filter.active=false;
           refresh();
       });
+      
     }
+    
+    
+    $scope.$watch('filter.content', updateEntries);
     $scope.$watch('filter.active', updateEntries);
     $scope.$watch('filter.split', updateEntries);
     $scope.$watch('proposals.length', updateEntries);
+    
+    // add/update mist menu
+    mist.menu.clear();
     updateEntries();
-        
+    
    }         
    
    
