@@ -69,7 +69,7 @@
 function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
 
    // the address of the dao
-   var address = window.location.hash.length>40 ?  window.location.hash.substring(1) : "0xbb9bc244d798123fde783fcc1c72d3bb8c189413";
+   var address = window.location.hash.length>40 ?  window.location.hash.substring(1) : "0x159fe90ac850c895e4fd144e705923cfa042d974"; // just for testing, we use a test-dao "0xbb9bc244d798123fde783fcc1c72d3bb8c189413";
    if (address.indexOf("0x")<0) address="0x"+address;
 //   address  ="0x159fe90ac850c895e4fd144e705923cfa042d974"; // just for testing, we use a test-dao
    var defaultAccounts = web3.eth.accounts;
