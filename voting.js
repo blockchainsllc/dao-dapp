@@ -325,6 +325,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
    
    // init mist-menu
    if (typeof mist !== 'undefined' && mist.mode === 'mist') {
+
       var headerElement = document.getElementsByTagName('md-toolbar');
       if (headerElement[0])  headerElement[0].style.paddingTop = "55px";
 
