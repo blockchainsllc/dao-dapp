@@ -54,7 +54,7 @@
     </div>
       <md-content >
          <md-list>
-            <md-list-item class="{{p.active?'newProposal':'oldProposal'}}" ng-repeat="p in proposals | filter:filter:strict" layout="column">
+            <md-list-item class="{{p.active?'newProposal':'oldProposal'}}" ng-repeat="p in proposals | filter:filter:strict | orderBy:'-proposalDeposit'" layout="column">
                 <div layout="row" style="width:100%">
                     <identicon username="p.creator" size="48" class="face noselect" ng-click="showProposal(p)"></identicon>
                     <div class="md-list-item-text" flex>
