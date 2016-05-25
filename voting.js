@@ -33,21 +33,26 @@
 				$scope.$watch(attributes.collapse, function (collapse) {
         
           if (!collapse)  element.style.display = 'block';
-
-					var newHeight = collapse ? 2 : getElementAutoHeight();
+          var autoHeight =   getElementAutoHeight();
+					var newHeight = collapse ? 2 : autoHeight;
 					element.style.height = newHeight + 'px';
           element.style.opacity = collapse ? 0 : 1;
           element.style.transform = "scaleY("+(collapse ? 0.4 : 1)+")";
           element.style.pointerEvents= collapse ? 'none': 'auto';
+          if (autoHeight>0)
+					   element.style.maxHeight = (collapse ? newHeight :autoHeight) + 'px';
 					ngElement.toggleClass('collapsed', collapse);
 				});
 
 				function getElementAutoHeight() {
+          var height = element.getAttribute("autHeight");
+          if (height && height>0) return parseInt(height);
 					var currentHeight = getElementCurrentHeight();
 					element.style.height = 'auto';
 					var autoHeight = getElementCurrentHeight();
 					element.style.height = currentHeight;
 					getElementCurrentHeight(); // Force the browser to recalc height after moving it back to normal
+          element.setAttribute("autHeight",autoHeight);
 					return autoHeight;
 				}
 
@@ -237,6 +242,8 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
           p.descriptionHTML = marked(p.description.substring(firstLine.length+1));
           p.description=firstLine;
       }
+      
+      p.descriptionHTML="asdasd<br>asdasd<br>asdasd<br>asdasd<br>asdasd<br>asdasd<br>asdasd<br>asdasd<br>234234234asdasd<br>asdasd<br>asdasd<br>2344234asdasd<br>asdasd<br>asdasd<br>354243";
 
       // if the proposal is already loaded, we want replace the values of it.      
       var existing = $scope.proposals[idx-1];
