@@ -94,7 +94,6 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
            p.enabled   = data < gas && $scope.account!=address; // it is only allowed if no error was thrown and if we didn't use the address-account, which is simply used as fallback for showing as readonly.
            p.gasNeeded[$scope.account] = data;
            refresh();
-           
         });
       }
    };
@@ -106,6 +105,10 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
          from: $scope.account, 
          gas:  $scope.currentProposal.gasNeeded[$scope.account]*2 
      }, function(err,data){
+        if (!err) {
+          $scope.currentProposal.enabled=false;
+          refresh();
+        }
         showAlert(err ? 'Error sending your vote' : 'Voting sent', err ? ('Your vote could not be send! '+err) : 'Your vote has been sent, waiting for the transaction to be confirmed.',ev);
      });
    };
