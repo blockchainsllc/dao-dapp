@@ -1,13 +1,17 @@
 (function(){
 
+   // the address of the dao
+   var address = window.location.hash.length>40 ?  window.location.hash.substring(1) : "0xbb9bc244d798123fde783fcc1c72d3bb8c189413"// "0x159fe90ac850c895e4fd144e705923cfa042d974"; // just for testing, we use a test-dao ;
+   var testnet = address.indexOf("T")==0;
+   if (testnet) address=address.substring(1);
+   if (address.indexOf("0x")<0) address="0x"+address;
+
 
    // pick up the global web3-object injected by mist.
    if(typeof web3 !== 'undefined')
       web3 = new Web3(web3.currentProvider);
    else
-      web3 = new Web3(new Web3.providers.HttpProvider("http://37.120.164.112:8555"));
-      
-
+      web3 = new Web3(new Web3.providers.HttpProvider( testnet ?  "http://37.120.164.112:8555" : "https://daohub.org/tokencreation/server/web3.php"));
       
    // define the module
    angular
@@ -73,9 +77,6 @@
 // define main-controller
 function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
 
-   // the address of the dao
-   var address = window.location.hash.length>40 ?  window.location.hash.substring(1) : "0x159fe90ac850c895e4fd144e705923cfa042d974"; // just for testing, we use a test-dao "0xbb9bc244d798123fde783fcc1c72d3bb8c189413";
-   if (address.indexOf("0x")<0) address="0x"+address;
 //   address  ="0x159fe90ac850c895e4fd144e705923cfa042d974"; // just for testing, we use a test-dao
    var defaultAccounts = web3.eth.accounts;
    if (!defaultAccounts || defaultAccounts.length==0) defaultAccounts=[address];

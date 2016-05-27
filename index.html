@@ -110,6 +110,7 @@
                             <div>
                               <md-button class="md-raised md-primary"  ng-disabled="!p.enabled" ng-click="sendVotingTransaction($event,true)">YES</md-button>
                               <md-button class="md-raised md-primary"  ng-disabled="!p.enabled" ng-click="sendVotingTransaction($event,false)">NO</md-button>
+                               <div  ng-show="p.enabled" class="text-light">Please vote carefully, there are no do-overs or take-backs.</div>
                             </div>
                         </div>
                     </div>                 

@@ -36,7 +36,10 @@ md-list-item {
     -webkit-align-items: flex-start !important;
     -ms-flex-align: flex-start !important;
 }
-
+.text-light {
+  padding-left:8px;
+  font-size:12px;
+}
 .desc {
   padding-top:5px;
   font-size: 18px;
