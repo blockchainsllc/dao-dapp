@@ -79,7 +79,7 @@
                             <div layout="row" flex><div class="plabel">Creator: </div><div class="pvalue" flex> {{ p.creator }} </div></div>                                
                             <div layout="row" flex><div class="plabel">Recipient: </div><div class="pvalue" flex> {{ p.recipient }} </div>      </div>                          
                             <div layout="row" flex><div class="plabel">Deposit: </div><div  class="pvalue" flex> {{ p.proposalDeposit | number:2 }} ETH </div>     </div>                           
-                            <div layout="row" flex><div class="plabel">Quroum: </div><div class="pvalue" flex> {{ (p.yea+p.nay)*100/total | number:2 }}% of {{ p.minQuroum()*100/total | number:2}}% </div>      </div>                          
+                            <div layout="row" flex><div class="plabel">Quroum: </div><div class="pvalue" flex> {{ (p.yea+p.nay)*100/total | number:2 }}% <span ng-show="!p.split">of {{ p.minQuroum()*100/total | number:2}}% </span></div>      </div>                          
                                 
                             <div ng-show="p.split" class="ptext">
                                 This Proposal is requesting a new Curator. It will split The DAO to create it's own DAO. Voting Yes allows you to also Split. You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO.
