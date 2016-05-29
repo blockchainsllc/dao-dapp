@@ -1,3 +1,18 @@
+import Web3 from 'web3';
+import marked from 'marked';
+import angular from 'angular';
+import ngMaterial from 'angular-material';
+import ngAnimate from 'angular-animate';
+import ngMessages from 'angular-messages';
+import ngSanitize from 'angular-sanitize';
+import Identicon from 'identicon.js/identicon';
+window.Identicon = Identicon;
+import 'angular-identicon/dist/angular-identicon';
+
+//import Connector from './loader';
+
+var web3 = window.web3;
+
 (function(){
 
    // the address of the dao
@@ -5,6 +20,8 @@
    var testnet = address.indexOf("T")==0;
    if (testnet) address=address.substring(1);
    if (address.indexOf("0x")<0) address="0x"+address;
+   
+  // var connector = new Connector(web3);
 
 
    // pick up the global web3-object injected by mist.
@@ -15,15 +32,15 @@
       
    // define the module
    angular
-   .module('daovoting', [ 'ngMaterial', 'ngAnimate','ngMessages' ,'ui.identicon','ngSanitize'])
+   .module('daovoting', [ ngMaterial, ngAnimate, ngMessages, 'ui.identicon', ngSanitize])
    // main controller
    .controller('DaoVotingCtrl', [ '$scope',  '$mdDialog', '$parse', '$filter', DaoVotingCtrl ])
    
    // format number
    .filter('ethnumber', function() {
       return function(val) {
-        if (val > 1000000) return web3.toBigNumber(val/1000000).toFixed(2)+" M";
-        else if (val > 1000) return web3.toBigNumber(val/1000).toFixed(2)+" K";
+        if (val > 1000000)   return web3.toBigNumber(val/1000000).toFixed(2)+" M";
+        else if (val > 1000) return web3.toBigNumber(val/   1000).toFixed(2)+" K";
         return web3.toBigNumber(val).toFixed(2);
       };
     })
@@ -96,14 +113,14 @@
 // define main-controller
 function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
 
-//   address  ="0x159fe90ac850c895e4fd144e705923cfa042d974"; // just for testing, we use a test-dao
+   // address  ="0x159fe90ac850c895e4fd144e705923cfa042d974"; // just for testing, we use a test-dao
    var defaultAccounts = web3.eth.accounts;
    if (!defaultAccounts || defaultAccounts.length==0) defaultAccounts=[address];
 
-   $scope.account  = defaultAccounts[0];            // address of the user to send the transaction from.
-   $scope.accounts = defaultAccounts;               // the list of users accounts                    
-   $scope.filter   = { active:true, split: false};  // filter the proposal list 
-   $scope.total    = 1;                             // total Supply
+   $scope.account   = defaultAccounts[0];            // address of the user to send the transaction from.
+   $scope.accounts  = defaultAccounts;               // the list of users accounts                    
+   $scope.filter    = { active:true, split: false};  // filter the proposal list 
+   $scope.total     = 1;                             // total Supply
    $scope.proposals = [];                           // loaded Proposals
    
    // called, when selecting a proposal 
