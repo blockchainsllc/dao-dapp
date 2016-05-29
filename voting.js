@@ -27,7 +27,26 @@
         return web3.toBigNumber(val).toFixed(2);
       };
     })
-
+   // create ethercamp link
+   .filter('ethercamp', function() {
+      return function(val) {
+        if (val.indexOf("0x")==0) val=val.substring(2);
+        return "https://" + (testnet ? "morden":"live") + ".ether.camp/account/"+val;
+      };
+    })
+    .filter('timeleft', function() {
+      return function(val) {
+         var left = val.getTime()- new Date().getTime();
+         if (left<0)
+           return val.toLocaleDateString();
+            
+          if (val>2 * 3600 * 1000 * 24) return parseInt(left/ (3600 * 1000 * 24))+" days left";
+          if (val>2 * 3600 * 1000     ) return parseInt(left/ (3600 * 1000     ))+" hours left";
+          if (val>2 * 60 * 1000       ) return parseInt(left/ (60 * 1000       ))+" minutes left";
+          return parseInt(left/ 1000              )+" seconds left";
+      };
+    })
+    
    // collapse directive creating a nice accordian-effect when selecting
    .directive('collapse', [function () {
 		return {
@@ -160,6 +179,8 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
    function buildVoteFunctionData(proposal, supports) {
       return contract.vote.getData(proposal, supports);
    }
+   
+
 
    // helper function to show a alert.
    function showAlert(title,msg,ev) {
@@ -195,6 +216,10 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
      $scope.proposals.push(createProposal(i+1,data,true)) 
    });
 
+   function updateSplitAmount(p) {
+      if (p.active && p.split) 
+        p.amount =  (p.yea * web3.fromWei($scope.actualBalance)) / $scope.total;     
+   }
 
    // creates a proposal-object from the data delivered by the web3-object
    function createProposal(idx, proposal, fromCache) {
@@ -224,10 +249,18 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
         data           : proposal,
         needsUpdate    : fromCache ? true : false
       };
+
+      // define the type of proposal
+      if (p.split) 
+        p.type = p.recipient == p.creator ? 'solosplit' : 'fork';
+      else 
+        p.type = p.recipient == address && p.amount==0 ? 'informal' : 'proposal';
         
       // add the filter-values.
       p.active = p.votingDeadline.getTime() > new Date().getTime() && p.open;
       
+      updateSplitAmount(p);
+
       // if the description contains JSON, we take the fields from there
       if (p.description.indexOf('{')==0) {
         var meta = JSON.parse(p.description);
@@ -286,6 +319,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
                 contract.rewardToken(address,function(err,r){
                     $scope.rewardToken = r.toNumber();
                 });
+                $scope.proposals.forEach(updateSplitAmount);
             });
           });
        }

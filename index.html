@@ -62,10 +62,10 @@
                     <div class="md-list-item-text" flex>
                         <div flex layout="row" class="headline">
                             <div class="desc noselect" ng-click="showProposal(p)">{{p.description}}
-                                <div class="date">{{p.votingDeadline.toLocaleDateString()}}</div> 
+                                <div class="date" title="voting deadline {{p.votingDeadline.toLocaleString()}}">{{p.votingDeadline | timeleft}}</div> 
                             </div>
                             <div flex> </div>
-                            <div ng-show="!p.split">
+                            <div ng-show="(!p.split || (p.split && p.active)) && p.type!='informal'">
                                 <div class="amount">{{p.amount | ethnumber}}</div>
                                 <div class="eth">ETH</div>
                             </div>
@@ -74,16 +74,22 @@
                  </div>
                     <div class="slideDown" collapse="currentProposal!==p" style="display:none;width:100%" layout="column" flex>
                         <div ng-bind-html="p.descriptionHTML">test</div>
+                        <div ng-show="p.type=='solosplit'" class="ptext">
+                            This Proposal is requesting the creator as new Curator, which is most likly a SoloSplit in order to withdraw the own funds from the DAO. It will split The DAO to create it's own DAO. Voting Yes allows you to also Split.  
+                            You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO.
+                        </div>
+
+                        <div ng-show="p.type=='fork'" class="ptext">
+                            This Proposal is requesting a new Curator ({{ <a href="{{ p.recipient | ethercamp }}" target="_new"> {{ p.recipient }} </a> }}) . It will split The DAO to create it's own DAO. Voting Yes allows you to also Split. You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO and join the new created DAO.
+                        </div>
+                        
                         <div>
                             <div layout="row" flex><div class="plabel">ID: </div><div  class="pvalue"> {{ p.id }} </div></div>                                
-                            <div layout="row" flex><div class="plabel">Creator: </div><div class="pvalue" flex> {{ p.creator }} </div></div>                                
-                            <div layout="row" flex><div class="plabel">Recipient: </div><div class="pvalue" flex> {{ p.recipient }} </div>      </div>                          
+                            <div layout="row" flex><div class="plabel">Creator: </div><div class="pvalue" flex><a href="{{ p.creator | ethercamp }}" target="_new">{{ p.creator }}</a></div></div>                                
+                            <div layout="row" flex><div class="plabel">Recipient: </div><div class="pvalue" flex><a href="{{ p.recipient | ethercamp }}" target="_new"> {{ p.recipient }} </a></div>      </div>                          
                             <div layout="row" flex><div class="plabel">Deposit: </div><div  class="pvalue" flex> {{ p.proposalDeposit | number:2 }} ETH </div>     </div>                           
                             <div layout="row" flex><div class="plabel">Quroum: </div><div class="pvalue" flex> {{ (p.yea+p.nay)*100/total | number:2 }}% <span ng-show="!p.split">of {{ p.minQuroum()*100/total | number:2}}% </span></div>      </div>                          
                                 
-                            <div ng-show="p.split" class="ptext">
-                                This Proposal is requesting a new Curator. It will split The DAO to create it's own DAO. Voting Yes allows you to also Split. You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO.
-                            </div>
                             
                             <div ng-show="!p.open" layout="row" flex>
                                <div layout="row" flex><div class="plabel">Passed: </div><div  class="pvalue">
@@ -96,14 +102,14 @@
                             <div style="margin-top:20px" class="progressRow" layout="row" flex>
                                  <div class="plabel">Yes:</div>
                                  <md-progress-linear flex md-mode="determinate" value="{{p.yea*100/total}}"></md-progress-linear>
-                                 <div class="pnumber">{{p.yea | ethnumber}}</div>
+                                 <div class="pnumber">{{p.yea*100 | ethnumber}} DAO</div>
                                  <div class="pnumber">({{p.yea*100/total | number:2}}%) &nbsp;</div>
                             </div> 
                             
                             <div style="margin-bottom:20px" class="progressRow" layout="row" flex>
                                  <div class="plabel">No:</div>
                                  <md-progress-linear flex md-mode="determinate" value="{{p.nay*100/total}}"></md-progress-linear>
-                                 <div class="pnumber">{{p.nay | ethnumber}}</div>
+                                 <div class="pnumber">{{p.nay*100 | ethnumber}} DAO</div>
                                  <div class="pnumber">({{p.nay*100/total | number:2}}%) &nbsp;</div>
                             </div> 
                             
