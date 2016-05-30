@@ -34,7 +34,8 @@
   },
   "scripts": {
     "start": "webpack-dev-server --inline --progress --colors --hot --port 3000",
-    "build": "NODE_ENV=production webpack --colors --progress"
+    "build": "NODE_ENV=production webpack --colors --progress",
+    "cache": "node src/js/loader.js > dist/proposals.json"
   },
   "repository": {
     "type": "git",

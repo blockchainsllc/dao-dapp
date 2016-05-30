@@ -6,35 +6,22 @@ import ngAnimate from 'angular-animate';
 import ngMessages from 'angular-messages';
 import ngSanitize from 'angular-sanitize';
 import Identicon from 'identicon.js/identicon';
+import Connector from './loader';
 window.Identicon = Identicon;
 import 'angular-identicon/dist/angular-identicon';
 
-//import Connector from './loader';
-
-var web3 = window.web3;
 
 (function(){
-
-   // the address of the dao
-   var address = window.location.hash.length>40 ?  window.location.hash.substring(1) : "0xbb9bc244d798123fde783fcc1c72d3bb8c189413"// "0x159fe90ac850c895e4fd144e705923cfa042d974"; // just for testing, we use a test-dao ;
-   var testnet = address.indexOf("T")==0;
-   if (testnet) address=address.substring(1);
-   if (address.indexOf("0x")<0) address="0x"+address;
-   
-  // var connector = new Connector(web3);
-
-
-   // pick up the global web3-object injected by mist.
-   if(typeof web3 !== 'undefined')
-      web3 = new Web3(web3.currentProvider);
-   else
-      web3 = new Web3(new Web3.providers.HttpProvider( testnet ?  "http://37.120.164.112:8555" : "https://daohub.org/tokencreation/server/web3.php"));
+  
+   var connector = new Connector(window.web3, window.location.hash);
+   var web3      = connector.web3;
+   var address   = connector.address;
       
    // define the module
    angular
    .module('daovoting', [ ngMaterial, ngAnimate, ngMessages, 'ui.identicon', ngSanitize])
    // main controller
-   .controller('DaoVotingCtrl', [ '$scope',  '$mdDialog', '$parse', '$filter', DaoVotingCtrl ])
+   .controller('DaoVotingCtrl', [ '$scope',  '$mdDialog', '$parse', '$filter', '$http', DaoVotingCtrl ])
    
    // format number
    .filter('ethnumber', function() {
@@ -48,7 +35,7 @@ var web3 = window.web3;
    .filter('ethercamp', function() {
       return function(val) {
         if (val.indexOf("0x")==0) val=val.substring(2);
-        return "https://" + (testnet ? "morden":"live") + ".ether.camp/account/"+val;
+        return "https://" + (connector.testnet ? "morden":"live") + ".ether.camp/account/"+val;
       };
     })
     .filter('timeleft', function() {
@@ -57,10 +44,10 @@ var web3 = window.web3;
          if (left<0)
            return val.toLocaleDateString();
             
-          if (val>2 * 3600 * 1000 * 24) return parseInt(left/ (3600 * 1000 * 24))+" days left";
-          if (val>2 * 3600 * 1000     ) return parseInt(left/ (3600 * 1000     ))+" hours left";
-          if (val>2 * 60 * 1000       ) return parseInt(left/ (60 * 1000       ))+" minutes left";
-          return parseInt(left/ 1000              )+" seconds left";
+         if (val>2 * 3600 * 1000 * 24) return parseInt(left/ (3600 * 1000 * 24)) + " days left";
+         if (val>2 * 3600 * 1000     ) return parseInt(left/ (3600 * 1000     )) + " hours left";
+         if (val>2 * 60 * 1000       ) return parseInt(left/ (60 * 1000       )) + " minutes left";
+         return                               parseInt(left/ 1000              ) + " seconds left";
       };
     })
     
@@ -111,18 +98,15 @@ var web3 = window.web3;
 
 
 // define main-controller
-function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
+function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http) {
 
-   // address  ="0x159fe90ac850c895e4fd144e705923cfa042d974"; // just for testing, we use a test-dao
-   var defaultAccounts = web3.eth.accounts;
-   if (!defaultAccounts || defaultAccounts.length==0) defaultAccounts=[address];
-
+   var defaultAccounts = connector.accounts;
    $scope.account   = defaultAccounts[0];            // address of the user to send the transaction from.
    $scope.accounts  = defaultAccounts;               // the list of users accounts                    
    $scope.filter    = { active:true, split: false};  // filter the proposal list 
    $scope.total     = 1;                             // total Supply
    $scope.proposals = [];                           // loaded Proposals
-   
+   $scope.isMist    = connector.isMist;
    // called, when selecting a proposal 
    $scope.showProposal = function(p,ev) {           
       $scope.currentProposal=p;
@@ -130,7 +114,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
       // if this proposal was taken from the cache we need to load the current values
       if (p.needsUpdate) loadProposal(p.id, refresh); 
          
-      if (!p.gasNeeded[$scope.account]) {
+      if (!p.gasNeeded[$scope.account] && connector.isMist) {
         // we need to check, if the user already voted. We do this, by calling the vote-function without a transaction and checking if all the gas is used, which means
         // a error was thrown ans so the user is not allowed to vote.
         var gas = 0x999999;
@@ -160,37 +144,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
      });
    };
 
-   // define the dao-contract   
-   var abi = [
-     {name:'proposals', "type":"function","outputs":[
-       {"type":"address","name":"recipient"},
-       {"type":"uint256","name":"amount"},
-       {"type":"string","name":"description"},
-       {"type":"uint256","name":"votingDeadline"},
-       {"type":"bool","name":"open"},
-       {"type":"bool","name":"proposalPassed"},
-       {"type":"bytes32","name":"proposalHash"},
-       {"type":"uint256","name":"proposalDeposit"},
-       {"type":"bool","name":"newCurator"},
-       {"type":"uint256","name":"yea"},
-       {"type":"uint256","name":"nay"},
-       {"type":"address","name":"creator"}],"inputs":[{"type":"uint256","name":""}],"constant":true},
-    {name:'totalSupply', "type":"function","outputs":[
-       {"type":"uint256","name":""}],"inputs":[],"constant":true},
-    {name:'minQuorumDivisor',"type":"function","outputs":[
-       {"type":"uint256","name":""}],"inputs":[],"constant":true},
-    {name:'actualBalance',"type":"function","outputs":[
-       {"type":"uint256","name":""}],"inputs":[],"constant":true},
-    {name:'rewardToken', "constant":true,"inputs":[{"name":"","type":"address"}],"outputs":[
-       {"name":"","type":"uint256"}],"type":"function"},       
-    {name:"vote", "type":"function","outputs":[
-       {"type":"uint256","name":"_voteID"}],"inputs":[
-       {"type":"uint256","name":"_proposalID"}, 
-       {"type":"bool","name":"_supportsProposal"}],"constant":false},
-    {name:"numberOfProposals","type":"function","outputs":[
-      {"type":"uint256","name":"_numberOfProposals"}],"inputs":[],"constant":true}
-   ];
-   var contract = web3.eth.contract(abi).at(address);
+ 
 
    // builds the data for the vote-function   
    function buildVoteFunctionData(proposal, supports) {
@@ -228,7 +182,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
      cachedProposals[p.id-1]=p.data;
      if (localStorage) localStorage.setItem(address,JSON.stringify(cachedProposals));
    }
-   var cachedProposals = localStorage && localStorage.getItem(address)? (JSON.parse(localStorage.getItem(address)) || []) : [];
+   var cachedProposals = localStorage && localStorage.getItem(address) && connector.isMist ? (JSON.parse(localStorage.getItem(address)) || []) : [];
    cachedProposals.forEach(function(data,i) { 
      $scope.proposals.push(createProposal(i+1,data,true)) 
    });
@@ -255,7 +209,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
         yea            : web3.fromWei(web3.toBigNumber(proposal[9]),"ether").toNumber(),
         nay            : web3.fromWei(web3.toBigNumber(proposal[10]),"ether").toNumber(),
         creator        : proposal[11],
-        enabled        : true,
+        enabled        : connector.isMist,
         minQuroum      : function() {
           var totalInWei = web3.toWei($scope.total,"ether");
           return  web3.fromWei( 
@@ -308,7 +262,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
 
    // loads one Proposal by calling the proposals(index)-function.
    function loadProposal(idx,cb) {
-      contract.proposals(idx,function(err,proposal){
+      connector.loadProposal(idx,function(err,proposal){
          if (err) {
              showAlert('Error getting the proposal '+idx, err);
              return;
@@ -322,35 +276,15 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
       });
    }
    
-
-   // read the total number of tokens   
-   contract.totalSupply(function(err,d){
-       if (err) 
-          showAlert('Error getting the total supply', err);
-       else {
-          $scope.total=web3.fromWei(d,"ether").toNumber();
-          contract.minQuorumDivisor(function(err,minq){
-            $scope.minQuorumDivisor =  minq.toNumber() || 5;
-            contract.actualBalance(function(err,bal){
-                $scope.actualBalance = bal.toNumber();
-                contract.rewardToken(address,function(err,r){
-                    $scope.rewardToken = r.toNumber();
-                });
-                $scope.proposals.forEach(updateSplitAmount);
-            });
-          });
-       }
-   });
-   
-   // read the total number of Proposals ...
-   contract.numberOfProposals(function(err,d){
-      if (err) {
-            showAlert('Error getting the proposals ', err);
-            return;
-      }
-
-      var idx = $scope.proposals.length+1;
-      $scope.allProposals =  web3.toBigNumber(d).toNumber();
+   connector.getStats($http, function(err, stats){
+     $scope.total            = stats.total;
+     $scope.minQuorumDivisor = stats.minQuorumDivisor;
+     $scope.actualBalance    = stats.actualBalance;
+     $scope.rewardToken      = stats.rewardToken;
+     $scope.allProposals     = stats.allProposals;     
+     $scope.proposals.forEach(updateSplitAmount);
+     
+     var idx = $scope.proposals.length+1;
       
       // check if the proposal came from cache and needs to be updated
       function nextReload(p) {
@@ -372,8 +306,8 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter) {
       
       // first read all missing proposals
       nextProposal();
+     
    });
-   
    
    // init mist-menu
    if (typeof mist !== 'undefined' && mist.mode === 'mist') {
