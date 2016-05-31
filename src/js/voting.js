@@ -21,7 +21,7 @@ import 'angular-identicon/dist/angular-identicon';
    angular
    .module('daovoting', [ ngMaterial, ngAnimate, ngMessages, 'ui.identicon', ngSanitize])
    // main controller
-   .controller('DaoVotingCtrl', [ '$scope',  '$mdDialog', '$parse', '$filter', '$http', DaoVotingCtrl ])
+   .controller('DaoVotingCtrl', [ '$scope',  '$mdDialog', '$parse', '$filter', '$http','$sce', DaoVotingCtrl ])
    
    // format number
    .filter('ethnumber', function() {
@@ -98,7 +98,7 @@ import 'angular-identicon/dist/angular-identicon';
 
 
 // define main-controller
-function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http) {
+function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
 
    var defaultAccounts = connector.accounts;
    $scope.account   = defaultAccounts[0];            // address of the user to send the transaction from.
@@ -143,6 +143,10 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http) {
         showAlert(err ? 'Error sending your vote' : 'Voting sent', err ? ('Your vote could not be send! '+err) : 'Your vote has been sent, waiting for the transaction to be confirmed.',ev);
      });
    };
+   
+   $scope.openWallet = function() {
+     window.open('https://www.myetherwallet.com/embedded-daoproposals.html?id='+$scope.currentProposal.id, 'myetherwallet', 'width=700,height=1000,menubar=no,resizable=yes,status=no,toolbar=no');
+   }
 
  
 
@@ -218,7 +222,8 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http) {
         },
         gasNeeded      : {},
         data           : proposal,
-        needsUpdate    : fromCache ? true : false
+        needsUpdate    : fromCache ? true : false,
+        walletUrl      : $sce.trustAsResourceUrl('https://www.myetherwallet.com/embedded-daoproposals.html?id='+idx)
       };
 
       // define the type of proposal
