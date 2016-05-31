@@ -257,6 +257,18 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
           p.description=firstLine;
       }
       
+      else if (p.description.length>200) {
+        // find a good position to split
+        var pos = p.description.indexOf(". ",50);
+        if (pos<0) pos = pos.indexOf(";",50);
+        if (pos<0) pos = pos.indexOf(" ",200);
+        if (pos<0) pos = pos.indexOf(" ",50);
+        if (pos<0) pos = 250;
+        firstLine = p.description.substring(0,pos+1);
+        p.descriptionHTML = marked(p.description.substring(firstLine.length));
+        p.description=firstLine;
+      }
+      
       // if the proposal is already loaded, we want replace the values of it.      
       var existing = $scope.proposals[idx-1];
       if (existing) {
