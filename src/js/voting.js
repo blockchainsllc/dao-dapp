@@ -58,13 +58,17 @@ import 'angular-identicon/dist/angular-identicon';
 			link: function ($scope, ngElement, attributes) {
 				var element = ngElement[0];
 				$scope.$watch(attributes.collapse, function (collapse) {
-        
+          if (collapse && element.style.display == 'none') {
+            element.style.height =  '0px';
+            element.style.transform = "scaleY(0)";
+            return;
+          }
           if (!collapse)  element.style.display = 'block';
           var autoHeight =   getElementAutoHeight();
 					var newHeight = collapse ? 2 : autoHeight;
 					element.style.height = newHeight + 'px';
           element.style.opacity = collapse ? 0 : 1;
-          element.style.transform = "scaleY("+(collapse ? 0.4 : 1)+")";
+          element.style.transform = "scaleY("+(collapse ? 0 : 1)+")";
           element.style.pointerEvents= collapse ? 'none': 'auto';
           if (autoHeight>0)
 					   element.style.maxHeight = (collapse ? newHeight :autoHeight) + 'px';

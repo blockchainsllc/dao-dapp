@@ -50,7 +50,7 @@
         </md-input-container>
         </div>
     </div>
-      <md-content >
+      <md-content flex>
          <md-list>
             <md-list-item class="{{p.active?'newProposal':'oldProposal'}}" ng-repeat="p in proposals | filter:filter:strict | orderBy:'-proposalDeposit'" layout="column">
                 <div layout="row" style="width:100%">
@@ -68,7 +68,7 @@
                         </div>
                     </div>
                  </div>
-                    <div class="slideDown" collapse="currentProposal!==p" style="display:none;width:100%" layout="column" flex>
+                    <div class="slideDown" layout="column"  collapse="currentProposal!==p" style="display:none;"" >
                         <div ng-bind-html="p.descriptionHTML">test</div>
                         <div ng-show="p.type=='solosplit'" class="ptext">
                             This Proposal is requesting the creator as new Curator, which is most likly a SoloSplit in order to withdraw the own funds from the DAO. It will split The DAO to create it's own DAO. Voting Yes allows you to also Split.
