@@ -67,7 +67,7 @@ Connector.prototype.getStats = function($http, cb) {
    
    if (!this.isMist && $http) {
       $http({  
-          method: 'GET',  url: 'https://vote.daohub.org/proposals.json'
+          method: 'POST',  url: 'https://vote.daohub.org/proposals.json'
       }).then(function (response) {
           _.proposals = response.data.proposals;
           cb(null, _.stats = response.data.stats); 
