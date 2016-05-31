@@ -156,7 +156,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
 
    // builds the data for the vote-function   
    function buildVoteFunctionData(proposal, supports) {
-      return contract.vote.getData(proposal, supports);
+      return connector.contract.vote.getData(proposal, supports);
    }
    
 
