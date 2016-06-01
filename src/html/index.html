@@ -33,16 +33,27 @@
                     </md-select>
                 </div>
             </span>
+            <span>
+                
+            </span>
 
          </div>
       </md-toolbar>
     <div class="ptabs" style="display:block">
         <div layout="row" flex>
+
+
+
         <div flex layout="row" layout-align="start end" style="min-width:200px">
             <md-tabs flex layout-align="start end">
                 <md-tab md-active="filter.active"  label="Current ({{(proposals | filter:{active:true, split:filter.split, content:filter.content}).length}})"   md-on-select="filter.active=true"></md-tab>
                 <md-tab md-active="!filter.active" label="Previous ({{(proposals | filter:{active:false, split:filter.split, content:filter.content}).length}})" md-on-select="filter.active=false"></md-tab>
             </md-tabs>
+        </div>
+        <div >
+                <md-button style="margin-bottom:0px;margin-top:20px;min-width:10px" ng-click="reload(true)">
+                    <md-icon style="color:white">autorenew</md-icon>
+                </md-button>
         </div>
         <md-input-container style="padding-bottom:2px;margin-top:0px" class="pwhite md-block">
             <md-icon style="color:white">search</md-icon>
@@ -76,7 +87,7 @@
                         </div>
 
                         <div ng-show="p.type=='fork'" class="ptext">
-                            This Proposal is requesting a new Curator ({{ <a href="{{ p.recipient | ethercamp }}" target="_new"> {{ p.recipient }} </a> }}) . It will split The DAO to create it's own DAO. Voting Yes allows you to also Split. You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO and join the new created DAO.
+                            This Proposal is requesting a new Curator ( <a href="{{ p.recipient | ethercamp }}" target="_new"> {{ p.recipient }} </a> ) . It will split The DAO to create it's own DAO. Voting Yes allows you to also Split. You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO and join the new created DAO.
                         </div>
 
                         <div>
@@ -84,6 +95,7 @@
                             <div layout="row" flex><div class="plabel">Creator: </div><div class="pvalue" flex><a href="{{ p.creator | ethercamp }}" target="_new">{{ p.creator }}</a></div></div>
                             <div layout="row" flex><div class="plabel">Recipient: </div><div class="pvalue" flex><a href="{{ p.recipient | ethercamp }}" target="_new"> {{ p.recipient }} </a></div>      </div>
                             <div layout="row" flex><div class="plabel">Deposit: </div><div  class="pvalue" flex> {{ p.proposalDeposit | number:2 }} ETH </div>     </div>
+                            <div layout="row" flex><div class="plabel">Document-Hash: </div><div  class="pvalue" flex> {{ p.proposalHash  }}</div>     </div>
                             <div layout="row" flex><div class="plabel">Quorum: </div><div class="pvalue" flex> {{ (p.yea+p.nay)*100/total | number:2 }}% <span ng-show="!p.split">of {{ p.minQuroum()*100/total | number:2}}% </span></div>      </div>
 
                             

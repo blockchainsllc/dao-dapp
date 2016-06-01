@@ -297,38 +297,43 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
       });
    }
    
-   connector.getStats($http, function(err, stats){
-     $scope.total            = stats.total;
-     $scope.minQuorumDivisor = stats.minQuorumDivisor;
-     $scope.actualBalance    = stats.actualBalance;
-     $scope.rewardToken      = stats.rewardToken;
-     $scope.allProposals     = stats.allProposals;     
-     $scope.proposals.forEach(updateSplitAmount);
-     
-     var idx = $scope.proposals.length+1;
+   
+   $scope.reload = function(force) {
+    if (force) delete connector.stats;
+    connector.getStats($http, function(err, stats){
+      $scope.total            = stats.total;
+      $scope.minQuorumDivisor = stats.minQuorumDivisor;
+      $scope.actualBalance    = stats.actualBalance;
+      $scope.rewardToken      = stats.rewardToken;
+      $scope.allProposals     = stats.allProposals;     
+      $scope.proposals.forEach(updateSplitAmount);
       
-      // check if the proposal came from cache and needs to be updated
-      function nextReload(p) {
-        while (p && !p.needsUpdate) p=$scope.proposals[p.id];
-        if (p) loadProposal(p.id, nextReload);
-      }
+      var idx = $scope.proposals.length+1;
+        
+        // check if the proposal came from cache and needs to be updated
+        function nextReload(p) {
+          while (p && !p.needsUpdate) p=$scope.proposals[p.id];
+          if (p) loadProposal(p.id, nextReload);
+        }
+        
+        // ... and now load each one of them.
+        function nextProposal() {
+          // after we read the missing, we read try to update the current ones as needed.
+          if (idx>$scope.allProposals) return nextReload($scope.proposals[0]); 
+              
+          loadProposal(idx++, function(p){
+              $scope.proposals[p.id-1]=p;
+              refresh();
+              nextProposal();
+          }); 
+        }
+        
+        // first read all missing proposals
+        nextProposal();
       
-      // ... and now load each one of them.
-      function nextProposal() {
-         // after we read the missing, we read try to update the current ones as needed.
-         if (idx>$scope.allProposals) return nextReload($scope.proposals[0]); 
-            
-         loadProposal(idx++, function(p){
-            $scope.proposals[p.id-1]=p;
-            refresh();
-            nextProposal();
-         }); 
-      }
-      
-      // first read all missing proposals
-      nextProposal();
-     
-   });
+    });
+   };
+   $scope.reload();
    
    // init mist-menu
    if (typeof mist !== 'undefined' && mist.mode === 'mist') {
