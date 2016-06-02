@@ -35,7 +35,10 @@ import 'angular-identicon/dist/angular-identicon';
    .filter('ethercamp', function() {
       return function(val) {
         if (val.indexOf("0x")==0) val=val.substring(2);
-        return "https://" + (connector.testnet ? "morden":"live") + ".ether.camp/account/"+val;
+        if (val.length>40)
+          return "https://" + (connector.testnet ? "morden":"live") + ".ether.camp/transaction/"+val;
+        else
+          return "https://" + (connector.testnet ? "morden":"live") + ".ether.camp/account/"+val;
       };
     })
     .filter('timeleft', function() {
@@ -230,6 +233,15 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
         needsUpdate    : fromCache ? true : false,
         walletUrl      : $sce.trustAsResourceUrl('https://www.myetherwallet.com/embedded-daoproposals.html?id='+idx)
       };
+      
+      connector.getTxData(idx,function(tx){
+        p.created = new Date(tx.created * 1000).toLocaleString() ;
+        p.block = tx.block;
+        p.txHash  = tx.txHash;
+        p.txData = tx.data;
+        p.votes = tx.votes;
+        refresh();
+      });
 
       // define the type of proposal
       if (p.split) 

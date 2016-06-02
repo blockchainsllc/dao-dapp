@@ -138,7 +138,7 @@ md-tabs.md-default-theme, md-tabs md-ink-bar {
 }
 
 
-md-progress-linear.yes .md-bar2 {
+md-progress-linear.yes .md-bar2,md-progress-linear.yesno .md-bar2 {
   background-color: green;
 }
 
@@ -151,3 +151,10 @@ md-progress-linear.no .md-bar1,md-progress-linear.yes .md-bar1 {
   background-color: rgb(235,235,235) !important;
 }
 
+md-progress-linear.yesno .md-bar1 {
+  background-color: red !important;
+}
+
+md-progress-linear.yesno .md-container {
+  height: 2px;
+}

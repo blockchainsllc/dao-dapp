@@ -60,6 +60,9 @@ Connector.prototype.loadProposal = function(idx, cb) {
       cb(null,this.proposals[idx-1]);
 };
 
+Connector.prototype.getTxData =function(idx, cb) {
+    if (this.tx && this.tx[idx-1]) cb(this.tx[idx-1]);
+}
 Connector.prototype.getStats = function($http, cb) {
   
    if (this.stats) return this.stats;
@@ -70,6 +73,7 @@ Connector.prototype.getStats = function($http, cb) {
           method: 'POST',  url: 'https://vote.daohub.org/proposals.json'
       }).then(function (response) {
           _.proposals = response.data.proposals;
+          _.tx   = response.data.tx;
           cb(null, _.stats = response.data.stats); 
      }, function errorCallback(response) {
           cb('No Cache created yet!');
@@ -112,13 +116,6 @@ Connector.prototype.createCache = function(cb) {
             });
         }
         load(0);
-    });
-}
-
-if (!process.browser) {
-    var connector = new Connector( undefined, process.argv[2] || "" );
-    connector.createCache(function(result){
-        console.log(JSON.stringify(result));
     });
 }
 
