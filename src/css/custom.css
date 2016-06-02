@@ -145,3 +145,12 @@ md-progress-linear.yes .md-bar2 {
 md-progress-linear.no .md-bar2 {
   background-color: red;
 }
+
+md-progress-linear.yes .md-bar1 {
+  background-color: green;
+}
+
+md-progress-linear.no .md-bar1,md-progress-linear.yes .md-bar1 {
+  background-color: rgb(235,235,235);
+}
+

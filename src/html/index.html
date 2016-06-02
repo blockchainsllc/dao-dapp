@@ -110,14 +110,14 @@
                             <div style="margin-top:20px" class="progressRow" layout="row" flex>
                                  <div class="plabel" style="width:30px">Yes:</div>
                                  <div class="pnumber" style="width:50px">({{p.yea*100/total | number:2}}%) &nbsp;</div>
-                                 <md-progress-linear class="yes" flex md-mode="determinate" value="{{progress(p.yea,total,p.yea,p.nay)}}"></md-progress-linear>
+                                 <md-progress-linear class="yes" flex md-mode="buffer" value="{{progress(p.yea,total,p.yea,p.nay)}}" md-buffer-value="{{progress(p.minQuroum(),total,p.yea,p.nay)}}"></md-progress-linear>
                                  <div class="pnumber">{{p.yea*100 | ethnumber}} DAO</div>
                             </div>
 
                             <div style="margin-bottom:20px" class="progressRow" layout="row" flex>
                                  <div class="plabel" style="width:30px">No:</div>
                                  <div class="pnumber" style="width:50px">({{p.nay*100/total | number:2}}%) &nbsp;</div>
-                                 <md-progress-linear class="no"  flex md-mode="determinate" value="{{progress(p.nay,total,p.yea,p.nay)}}"></md-progress-linear>
+                                 <md-progress-linear class="no"  flex md-mode="buffer"  value="{{progress(p.nay,total,p.yea,p.nay)}}" md-buffer-value="{{progress(p.minQuroum(),total,p.yea,p.nay)}}"></md-progress-linear>
                                  <div class="pnumber">{{p.nay*100 | ethnumber}} DAO</div>
                             </div>
 

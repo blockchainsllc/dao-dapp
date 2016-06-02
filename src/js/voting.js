@@ -300,7 +300,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
    
    $scope.progress = function(val,total, y, n) {
      total = Math.max(y,n) + (total - y -n)/2;
-     return 100 - Math.pow(val/total-1,2)*100;
+     return 100 - Math.round(Math.pow(val/total-1,2)*1000)/10;
    }
    
    $scope.reload = function(force) {
