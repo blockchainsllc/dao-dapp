@@ -136,3 +136,12 @@ md-tabs.md-default-theme, md-tabs md-ink-bar {
 .pwhite * {
   color:white !important;
 }
+
+
+md-progress-linear.yes .md-bar2 {
+  background-color: green;
+}
+
+md-progress-linear.no .md-bar2 {
+  background-color: red;
+}

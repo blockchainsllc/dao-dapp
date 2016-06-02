@@ -111,6 +111,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
    $scope.total     = 1;                             // total Supply
    $scope.proposals = [];                           // loaded Proposals
    $scope.isMist    = connector.isMist;
+   $scope.address   = address;
    // called, when selecting a proposal 
    $scope.showProposal = function(p,ev) {           
       $scope.currentProposal=p;
@@ -297,6 +298,9 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
       });
    }
    
+   $scope.progress = function(val,total) {
+     return 100 - Math.pow(val/total-1,2)*100;
+   }
    
    $scope.reload = function(force) {
     if (force) delete connector.stats;
