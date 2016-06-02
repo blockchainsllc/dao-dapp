@@ -14,11 +14,11 @@ function getTx(page,cb) {
    }).on('error', cb);
 }
 
-function searchTransactions(handlers, done) {
+function searchTransactions(handler, done) {
    function next(err, data, page) {
       if (err) console.log(err);
       else {
-         handlers.forEach(h=> data.result.forEach(h));
+         data.result.forEach(handler);
          if (data.result.length>0)
             getTx(page+1, next);
          else
