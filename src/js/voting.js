@@ -47,10 +47,10 @@ import 'angular-identicon/dist/angular-identicon';
          if (left<0)
            return val.toLocaleDateString();
             
-         if (val>2 * 3600 * 1000 * 24) return parseInt(left/ (3600 * 1000 * 24)) + " days left";
-         if (val>2 * 3600 * 1000     ) return parseInt(left/ (3600 * 1000     )) + " hours left";
-         if (val>2 * 60 * 1000       ) return parseInt(left/ (60 * 1000       )) + " minutes left";
-         return                               parseInt(left/ 1000              ) + " seconds left";
+         if (left>2 * 3600 * 1000 * 24) return parseInt(left/ (3600 * 1000 * 24)) + " days left";
+         if (left>2 * 3600 * 1000     ) return parseInt(left/ (3600 * 1000     )) + " hours left";
+         if (left>2 * 60 * 1000       ) return parseInt(left/ (60 * 1000       )) + " minutes left";
+         return                                parseInt(left/ 1000              ) + " seconds left";
       };
     })
     
