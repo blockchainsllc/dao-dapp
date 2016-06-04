@@ -90,7 +90,7 @@ function startTxSearch(cb) {
       {
          var res = coder.decodeParams(['uint','bool'],tx.input.substring(10));
          var proposalId = res[0].toNumber();
-         proposals[proposalId-1].votes.push({
+         (proposals[proposalId-1] || (proposals[proposalId-1]={})).votes.push({
             address : tx.from,
             support : res[1],
             block   : tx.blockNumber,
