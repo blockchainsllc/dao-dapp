@@ -55,7 +55,10 @@ function startTxSearch(data, cb) {
       {
          var res = coder.decodeParams(['uint','bool'],tx.input.substring(10));
          var proposalId = res[0].toNumber();
-         (proposals[proposalId-1] || (proposals[proposalId-1]={votes:[]})).votes.push({
+         var votes = (proposals[proposalId-1] || (proposals[proposalId-1]={votes:[]})).votes;
+         if (votes.find(v=>v.tx==tx.hash)) return;
+         
+         votes.push({
             address : tx.from,
             support : res[1],
             block   : tx.blockNumber,
@@ -72,7 +75,6 @@ connector.createCache(function(result){
    
    var target = "dist/proposals.json";
    fs.readFile(target, {encoding:'UTF-8'}, (err,data) => {
-
       startTxSearch(err ? { tx:[], page:80 } : JSON.parse(data), (proposals,page) => {
          result.tx   = proposals;
          result.page = page;
