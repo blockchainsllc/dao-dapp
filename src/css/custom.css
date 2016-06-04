@@ -71,6 +71,7 @@ md-list-item {
 }
 .plabel {
   width:80px;
+  min-width:80px;
   font-size: 12px;
 }
 .pnumber {
@@ -81,6 +82,7 @@ md-list-item {
 }
 .pvalue {
   text-overflow:ellipsis; 
+  word-wrap: break-word;
   overflow:hidden;
   font-size: 12px;
 }
