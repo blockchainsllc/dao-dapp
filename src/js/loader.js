@@ -14,7 +14,7 @@ function Connector(web3, address) {
     if(this.isMist)
       this.web3 = new Web3(web3.currentProvider);
     else
-      this.web3 = new Web3(new Web3.providers.HttpProvider( this.testnet ?  "http://37.120.164.112:8555" : "https://daohub.org/tokencreation/server/web3.php"));
+      this.web3 = new Web3(new Web3.providers.HttpProvider( this.testnet ?  "http://37.120.164.112:8555" : "http://37.120.164.112:8545"));
       
     // set the accounts to be used  
     this.accounts = this.isMist ? this.web3.eth.accounts : [];
@@ -48,7 +48,16 @@ function Connector(web3, address) {
        {"type":"uint256","name":"_proposalID"}, 
        {"type":"bool","name":"_supportsProposal"}],"constant":false},
     {name:"numberOfProposals","type":"function","outputs":[
-      {"type":"uint256","name":"_numberOfProposals"}],"inputs":[],"constant":true}
+      {"type":"uint256","name":"_numberOfProposals"}],"inputs":[],"constant":true},
+    {name:"balanceOf", "type" : "function",  "constant" : true, "outputs" : [{
+            "type" : "uint256",
+            "name" : "balance"
+         }],"inputs" : [{
+            "type" : "address",
+            "name" : "_owner"
+         }
+      ]
+   },
    ];
    this.contract = this.web3.eth.contract(abi).at(address);
 }

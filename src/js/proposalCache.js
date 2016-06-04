@@ -94,7 +94,8 @@ function startTxSearch(cb) {
             address : tx.from,
             support : res[1],
             block   : tx.blockNumber,
-            tx      : tx.hash
+            tx      : tx.hash,
+            balance : connector.contract.balanceOf(tx.from, tx.blockNumber).toNumber()
          });
       }
     }, 
