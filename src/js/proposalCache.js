@@ -69,9 +69,9 @@ function startTxSearch(cb) {
       if (tx.input.indexOf("0x612e45a3")==0 && tx.isError=="0"/* && !tx.gasUsed>=tx.gas*/) // new Proposal!
       {
          var res = coder.decodeParams(['address','uint','string','bytes','uint','bool'],tx.input.substring(10));
-         var logs = connector.web3.eth.getTransactionReceipt(tx.hash.substring(2)).logs;
-         if (!logs || logs.length==0) return;
-         var proposalId = parseInt(logs[0].topics[1]);
+         var receipt = connector.web3.eth.getTransactionReceipt(tx.hash.substring(2));
+         if (!receipt || !receipt.logs || !receipt.logs.length) return;
+         var proposalId = parseInt(receipt.logs[0].topics[1]);
          console.log("proposal #"+proposalId+" : "+res[2]);
          proposals[proposalId-1]={
             recipient: res[0],
