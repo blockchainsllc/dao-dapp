@@ -146,12 +146,14 @@
                                  <div class="pnumber">{{p.nay*100 | ethnumber}} DAO</div>
                                  <div class="pnumber" style="width:60px">({{ ((p.votes||[]) | filter:{support:false}).length }} Tx)</div>                                 
                             </div>
-                            
-                            <div style="widht:100%;height:500px;padding-right:10px">
-                                <canvas id="bar" class="chart chart-bar" chart-data="p.chartData"
+                            <!--
+                             <div style="width:100%;height:500px;max-height:500px;padding-right:10px">
+                                <canvas id="bar" class="chart chart-bar" height="100" chart-data="p.chartData" chart-options="{size:{height:500}}"
                                     chart-labels="p.chartLabels" chart-legend="false" chart-series="['yes','no']" >
                                 </canvas> 
                              </div>
+                             -->
+
 
                             <div ng-show="isMist">
                               <md-button class="md-raised md-primary"  ng-disabled="!p.enabled" ng-click="sendVotingTransaction($event,true)">YES</md-button>

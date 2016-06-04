@@ -107,7 +107,8 @@ window.AngularChart = AngularChart;
       .primaryPalette('blue')
       .accentPalette('red');
       ChartJsProvider.setOptions({
-        chartColors: ['#00FF00', '#FF0000'],
+        size : {height:350},
+        chartColors: ['#009900', '#FF0000'],
         responsive: true,
         scales: {
                 xAxes: [{
