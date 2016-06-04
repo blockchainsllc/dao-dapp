@@ -160,3 +160,7 @@ md-progress-linear.yesno .md-bar1 {
 md-progress-linear.yesno .md-container {
   height: 2px;
 }
+
+.slideDown md-tab-item {
+    color: black !important;
+}

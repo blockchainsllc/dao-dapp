@@ -90,79 +90,91 @@
                     </div>
                  </div>
                     <div class="slideDown" layout="column"  collapse="currentProposal!==p" style="display:none;"" >
-                        <div ng-bind-html="p.descriptionHTML">test</div>
-                        <div ng-show="p.type=='solosplit'" class="ptext">
-                            This Proposal is requesting the creator as new Curator, which is most likly a SoloSplit in order to withdraw the own funds from the DAO. It will split The DAO to create it's own DAO. Voting Yes allows you to also Split.
-                            You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO.
-                        </div>
-
-                        <div ng-show="p.type=='fork'" class="ptext">
-                            This Proposal is requesting a new Curator ( <a href="{{ p.recipient | ethercamp }}" target="_new"> {{ p.recipient }} </a> ) . It will split The DAO to create it's own DAO. Voting Yes allows you to also Split. You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO and join the new created DAO.
-                        </div>
-
-                        <div>
+                        <md-tabs md-dynamic-height md-border-bottom>
+                            <md-tab label="Description">
+                                <md-content class="md-padding">
+                                                        
                             
-                            <div class="row">
-                              <div layout="row" flex class="col-md-6"><div class="plabel">ID: </div><div  class="pvalue"> #{{ p.id }} </div></div>
-                              <div layout="row" flex class="col-md-6"><div class="plabel"> Deadline : </div><div  class="pvalue"> {{ p.votingDeadline.toLocaleString() }}</div></div>
+                            
+                            <div ng-bind-html="p.descriptionHTML">test</div>
+                            <div ng-show="p.type=='solosplit'" class="ptext">
+                                This Proposal is requesting the creator as new Curator, which is most likly a SoloSplit in order to withdraw the own funds from the DAO. It will split The DAO to create it's own DAO. Voting Yes allows you to also Split.
+                                You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO.
                             </div>
+
+                            <div ng-show="p.type=='fork'" class="ptext">
+                                This Proposal is requesting a new Curator ( <a href="{{ p.recipient | ethercamp }}" target="_new"> {{ p.recipient }} </a> ) . It will split The DAO to create it's own DAO. Voting Yes allows you to also Split. You will have to confirm this vote by Calling the function SplitDAO() to actually leave The DAO and join the new created DAO.
+                            </div>
+
+                            <div>
                                 
-                            <div class="row">
-                              <div layout="row" flex class="col-md-6"><div class="plabel">Creator: </div><div class="pvalue" flex><a href="{{ p.creator | ethercamp }}" target="_new">{{ p.creator }}</a></div></div>
-                              <div layout="row" flex class="col-md-6"><div class="plabel"> created : </div><div  class="pvalue"> {{ p.created }} <span ng-show="p.txHash">in Block <a href="{{ p.txHash | ethercamp }}" target="_new">{{ p.block }}</a></span></div></div>
-                            </div>
+                                <div class="row">
+                                <div layout="row" flex class="col-md-6"><div class="plabel">ID: </div><div  class="pvalue"> #{{ p.id }} </div></div>
+                                <div layout="row" flex class="col-md-6"><div class="plabel"> Deadline : </div><div  class="pvalue"> {{ p.votingDeadline.toLocaleString() }}</div></div>
+                                </div>
+                                    
+                                <div class="row">
+                                <div layout="row" flex class="col-md-6"><div class="plabel">Creator: </div><div class="pvalue" flex><a href="{{ p.creator | ethercamp }}" target="_new">{{ p.creator }}</a></div></div>
+                                <div layout="row" flex class="col-md-6"><div class="plabel"> created : </div><div  class="pvalue"> {{ p.created }} <span ng-show="p.txHash">in Block <a href="{{ p.txHash | ethercamp }}" target="_new">{{ p.block }}</a></span></div></div>
+                                </div>
+                                    
+                                <div class="row">
+                                <div layout="row" flex class="col-md-6"><div class="plabel">Recipient: </div><div class="pvalue" flex><a href="{{ p.recipient | ethercamp }}" target="_new"> {{ p.recipient==address ? 'DAO' : p.recipient }} </a></div>      </div>
+                                <div layout="row" flex class="col-md-6"><div class="plabel">Deposit: </div><div  class="pvalue" flex> {{ p.proposalDeposit | number:2 }} ETH </div>     </div>
+                                </div>
+                                <div class="row" >
+                                <div layout="row" flex class="col-md-6"><div class="plabel">Quorum: </div><div class="pvalue" flex> {{ (p.yea+p.nay)*100/total | number:2 }}% <span ng-show="!p.split">of {{ p.minQuroum()*100/total | number:2}}% </span></div>      </div>
+                                <div layout="row" flex class="col-md-6" ng-show="p.txData && p.txData.length>2"><div class="plabel">TxData: </div><div  class="pvalue"> {{ p.txData }} </div></div>
+                                </div>
                                 
-                            <div class="row">
-                               <div layout="row" flex class="col-md-6"><div class="plabel">Recipient: </div><div class="pvalue" flex><a href="{{ p.recipient | ethercamp }}" target="_new"> {{ p.recipient==address ? 'DAO' : p.recipient }} </a></div>      </div>
-                               <div layout="row" flex class="col-md-6"><div class="plabel">Deposit: </div><div  class="pvalue" flex> {{ p.proposalDeposit | number:2 }} ETH </div>     </div>
-                            </div>
-                            <div class="row" >
-                              <div layout="row" flex class="col-md-6"><div class="plabel">Quorum: </div><div class="pvalue" flex> {{ (p.yea+p.nay)*100/total | number:2 }}% <span ng-show="!p.split">of {{ p.minQuroum()*100/total | number:2}}% </span></div>      </div>
-                              <div layout="row" flex class="col-md-6" ng-show="p.txData && p.txData.length>2"><div class="plabel">TxData: </div><div  class="pvalue"> {{ p.txData }} </div></div>
-                            </div>
-                            
 
-                            
-                            <div ng-show="!p.open" layout="row" flex>
-                               <div layout="row" flex><div class="plabel">Passed: </div><div  class="pvalue">
-                                 <span ng-show="p.proposalPassed" style="color:green;font-size:12px">Yes</span>
-                                 <span ng-show="!p.proposalPassed" style="color:red;font-size:12px">No</span>
-                               </div></div>
+                                
+                                <div ng-show="!p.open" layout="row" flex>
+                                <div layout="row" flex><div class="plabel">Passed: </div><div  class="pvalue">
+                                    <span ng-show="p.proposalPassed" style="color:green;font-size:12px">Yes</span>
+                                    <span ng-show="!p.proposalPassed" style="color:red;font-size:12px">No</span>
+                                </div></div>
 
-                            </div>
+                                </div>
 
-                            <div style="margin-top:20px" class="progressRow" layout="row" flex>
-                                 <div class="plabel" style="width:30px">Yes:</div>
-                                 <div class="pnumber" style="width:50px">({{p.yea*100/total | number:2}}%) &nbsp;</div>
-                                 <md-progress-linear class="yes" flex md-mode="buffer" value="{{progress(p.yea,total,p.yea,p.nay)}}" md-buffer-value="{{progress(p.minQuroum(),total,p.yea,p.nay)}}"></md-progress-linear>
-                                 <div class="pnumber">{{p.yea*100 | ethnumber}} DAO  </div>
-                                 <div class="pnumber" style="width:60px">({{ ((p.votes||[]) | filter:{support:true}).length }} Tx)  </div>
-                            </div>
+                                <div style="margin-top:20px" class="progressRow" layout="row" flex>
+                                    <div class="plabel" style="width:30px">Yes:</div>
+                                    <div class="pnumber" style="width:50px">({{p.yea*100/total | number:2}}%) &nbsp;</div>
+                                    <md-progress-linear class="yes" flex md-mode="buffer" value="{{progress(p.yea,total,p.yea,p.nay)}}" md-buffer-value="{{progress(p.minQuroum(),total,p.yea,p.nay)}}"></md-progress-linear>
+                                    <div class="pnumber">{{p.yea*100 | ethnumber}} DAO  </div>
+                                    <div class="pnumber" style="width:60px">({{ ((p.votes||[]) | filter:{support:true}).length }} Tx)  </div>
+                                </div>
 
-                            <div style="margin-bottom:20px" class="progressRow" layout="row" flex ng-show="!p.split">
-                                 <div class="plabel" style="width:30px">No:</div>
-                                 <div class="pnumber" style="width:50px">({{p.nay*100/total | number:2}}%) &nbsp;</div>
-                                 <md-progress-linear class="no"  flex md-mode="buffer"  value="{{progress(p.nay,total,p.yea,p.nay)}}" md-buffer-value="{{progress(p.minQuroum(),total,p.yea,p.nay)}}"></md-progress-linear>
-                                 <div class="pnumber">{{p.nay*100 | ethnumber}} DAO</div>
-                                 <div class="pnumber" style="width:60px">({{ ((p.votes||[]) | filter:{support:false}).length }} Tx)</div>                                 
-                            </div>
-                            <!--
-                             <div style="width:100%;height:500px;max-height:500px;padding-right:10px">
-                                <canvas id="bar" class="chart chart-bar" height="100" chart-data="p.chartData" chart-options="{size:{height:500}}"
-                                    chart-labels="p.chartLabels" chart-legend="false" chart-series="['yes','no']" >
-                                </canvas> 
-                             </div>
-                             -->
+                                <div style="margin-bottom:20px" class="progressRow" layout="row" flex ng-show="!p.split">
+                                    <div class="plabel" style="width:30px">No:</div>
+                                    <div class="pnumber" style="width:50px">({{p.nay*100/total | number:2}}%) &nbsp;</div>
+                                    <md-progress-linear class="no"  flex md-mode="buffer"  value="{{progress(p.nay,total,p.yea,p.nay)}}" md-buffer-value="{{progress(p.minQuroum(),total,p.yea,p.nay)}}"></md-progress-linear>
+                                    <div class="pnumber">{{p.nay*100 | ethnumber}} DAO</div>
+                                    <div class="pnumber" style="width:60px">({{ ((p.votes||[]) | filter:{support:false}).length }} Tx)</div>                                 
+                                </div>
+                                <!--
+
+                                -->
 
 
-                            <div ng-show="isMist">
-                              <md-button class="md-raised md-primary"  ng-disabled="!p.enabled" ng-click="sendVotingTransaction($event,true)">YES</md-button>
-                              <md-button class="md-raised md-primary"  ng-disabled="!p.enabled" ng-click="sendVotingTransaction($event,false)">NO</md-button>
-                               <div  ng-show="p.enabled" class="text-light">Please vote carefully, there are no do-overs or take-backs.</div>
-                            </div>
-                            <div ng-show="!isMist">
-                              <md-button class="md-raised md-primary"  ng-click="openWallet(p)">VOTE</md-button>
-                            </div>
+                                <div ng-show="isMist">
+                                <md-button class="md-raised md-primary"  ng-disabled="!p.enabled" ng-click="sendVotingTransaction($event,true)">YES</md-button>
+                                <md-button class="md-raised md-primary"  ng-disabled="!p.enabled" ng-click="sendVotingTransaction($event,false)">NO</md-button>
+                                <div  ng-show="p.enabled" class="text-light">Please vote carefully, there are no do-overs or take-backs.</div>
+                                </div>
+                                <div ng-show="!isMist">
+                                <md-button class="md-raised md-primary"  ng-click="openWallet(p)">VOTE</md-button>
+                                </div>
+                                </md-content>
+                            </md-tab>
+                            <md-tab label="Votes" md-on-select="p.chart.resize()">
+                                <md-content class="md-padding"  style="width:100%;height:270px;max-height:270px;padding-right:10px;overflow:hidden">
+                                    <canvas id="bar" class="chart chart-bar" chart-data="p.chartData" chart-options="{maintainAspectRatio:false}"
+                                        chart-labels="p.chartLabels" chart-legend="false" chart-series="['yes','no']" >
+                                    </canvas> 
+                                </md-content>
+                            </md-tab>
+                         </md-tabs>
 
                         </div>
                     </div>

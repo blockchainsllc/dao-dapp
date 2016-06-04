@@ -12,6 +12,7 @@ import 'angular-identicon/dist/angular-identicon';
 import Chart from 'chart.js';
 import AngularChart from 'angular-chart.js/dist/angular-chart';
 window.AngularChart = AngularChart;
+window.Chart = Chart;
 
 
 (function(){
@@ -173,6 +174,15 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
    $scope.openWallet = function() {
      window.open('https://www.myetherwallet.com/embedded-daoproposals.html?id='+$scope.currentProposal.id, 'myetherwallet', 'width=700,height=1000,menubar=no,resizable=yes,status=no,toolbar=no');
    }
+   
+   $scope.$on('chart-create', function(chart,controller) {
+     chart=controller.chart;
+     $scope.currentProposal.chart = chart; 
+     setTimeout(function(){
+       chart.resize();
+     },100);
+     
+   });
 
  
 
