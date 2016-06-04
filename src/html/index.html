@@ -25,6 +25,7 @@
             <span layout="row" style="font-size:12px" class="centeredRow">
                 <md-switch ng-model="filter.split" aria-label="Split" >
                     <span style="color:white">Splits ({{(proposals | filter:{split:true}).length}})</span>
+                    <md-tooltip>Show only Split-Proposals</md-tooltip>
                 </md-switch>
 
                 <div layout="row" ng-show="accounts && accounts.length>1" class="centeredRow">
@@ -53,10 +54,18 @@
         <div >
                 <md-button style="margin-bottom:0px;margin-top:20px;min-width:10px" ng-click="reload(true)">
                     <md-icon style="color:white">autorenew</md-icon>
+                    <md-tooltip>Update proposals</md-tooltip>
                 </md-button>
+                <!--
+                <md-button style="margin-bottom:0px;margin-top:20px;min-width:10px"  >
+                    <md-icon style="color:white">sort</md-icon>
+                    <md-tooltip>Change order</md-tooltip>
+                </md-button>
+                -->
         </div>
         <md-input-container style="padding-bottom:2px;margin-top:0px" class="pwhite md-block">
             <md-icon style="color:white">search</md-icon>
+            <md-tooltip>search within proposals</md-tooltip>
             <input placeholder="Search" style="color:white;width:140px" ng-model="filter.content">
         </md-input-container>
         </div>
@@ -94,25 +103,24 @@
                         <div>
                             
                             <div class="row">
-                              <div layout="row" flex class="col-md-6"><div class="plabel">ID: </div><div  class="pvalue"> {{ p.id }} </div></div>
+                              <div layout="row" flex class="col-md-6"><div class="plabel">ID: </div><div  class="pvalue"> #{{ p.id }} </div></div>
+                              <div layout="row" flex class="col-md-6"><div class="plabel"> Deadline : </div><div  class="pvalue"> {{ p.votingDeadline.toLocaleString() }}</div></div>
                             </div>
                                 
                             <div class="row">
                               <div layout="row" flex class="col-md-6"><div class="plabel">Creator: </div><div class="pvalue" flex><a href="{{ p.creator | ethercamp }}" target="_new">{{ p.creator }}</a></div></div>
-                              <div layout="row" flex class="col-md-6"><div class="plabel"> created : </div><div  class="pvalue"> {{ p.created }} in Block <a href="{{ p.txHash | ethercamp }}" target="_new">{{ p.block }}</a></div></div>
+                              <div layout="row" flex class="col-md-6"><div class="plabel"> created : </div><div  class="pvalue"> {{ p.created }} <span ng-show="p.txHash">in Block <a href="{{ p.txHash | ethercamp }}" target="_new">{{ p.block }}</a></span></div></div>
                             </div>
                                 
                             <div class="row">
                                <div layout="row" flex class="col-md-6"><div class="plabel">Recipient: </div><div class="pvalue" flex><a href="{{ p.recipient | ethercamp }}" target="_new"> {{ p.recipient==address ? 'DAO' : p.recipient }} </a></div>      </div>
                                <div layout="row" flex class="col-md-6"><div class="plabel">Deposit: </div><div  class="pvalue" flex> {{ p.proposalDeposit | number:2 }} ETH </div>     </div>
                             </div>
-                            <div class="row" ng-show="p.txData && p.txData.length>2">
-                              <div layout="row" flex class="col-md-12"><div class="plabel">TxData: </div><div  class="pvalue"> {{ p.txData }} </div></div>
+                            <div class="row" >
+                              <div layout="row" flex class="col-md-6"><div class="plabel">Quorum: </div><div class="pvalue" flex> {{ (p.yea+p.nay)*100/total | number:2 }}% <span ng-show="!p.split">of {{ p.minQuroum()*100/total | number:2}}% </span></div>      </div>
+                              <div layout="row" flex class="col-md-6" ng-show="p.txData && p.txData.length>2"><div class="plabel">TxData: </div><div  class="pvalue"> {{ p.txData }} </div></div>
                             </div>
                             
-                            <div class="row">
-                               <div layout="row" flex class="col-md-6"><div class="plabel">Quorum: </div><div class="pvalue" flex> {{ (p.yea+p.nay)*100/total | number:2 }}% <span ng-show="!p.split">of {{ p.minQuroum()*100/total | number:2}}% </span></div>      </div>
-                            </div>
 
                             
                             <div ng-show="!p.open" layout="row" flex>
@@ -138,6 +146,12 @@
                                  <div class="pnumber">{{p.nay*100 | ethnumber}} DAO</div>
                                  <div class="pnumber" style="width:60px">({{ ((p.votes||[]) | filter:{support:false}).length }} Tx)</div>                                 
                             </div>
+                            
+                            <div style="widht:100%;height:500px;padding-right:10px">
+                                <canvas id="bar" class="chart chart-bar" chart-data="p.chartData"
+                                    chart-labels="p.chartLabels" chart-legend="true" chart-series="['yes','no']" >
+                                </canvas> 
+                             </div>
 
                             <div ng-show="isMist">
                               <md-button class="md-raised md-primary"  ng-disabled="!p.enabled" ng-click="sendVotingTransaction($event,true)">YES</md-button>
@@ -146,7 +160,6 @@
                             </div>
                             <div ng-show="!isMist">
                               <md-button class="md-raised md-primary"  ng-click="openWallet(p)">VOTE</md-button>
-                               <div>In order to vote on this proposal, you can either use this URL within the <a href="https://github.com/ethereum/mist/releases/" target="_blank">Mist-Browser</a>, or you can use the <a href="https://www.myetherwallet.com/#dao-proposals" target="_blank">MyEtherWallet</a>.    </div>
                             </div>
 
                         </div>

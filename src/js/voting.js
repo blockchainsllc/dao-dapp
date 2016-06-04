@@ -9,6 +9,9 @@ import Identicon from 'identicon.js/identicon';
 import Connector from './loader';
 window.Identicon = Identicon;
 import 'angular-identicon/dist/angular-identicon';
+import Chart from 'chart.js';
+import AngularChart from 'angular-chart.js/dist/angular-chart';
+window.AngularChart = AngularChart;
 
 
 (function(){
@@ -16,10 +19,12 @@ import 'angular-identicon/dist/angular-identicon';
    var connector = new Connector(window.web3, window.location.hash);
    var web3      = connector.web3;
    var address   = connector.address;
+
+   window.Chart.defaults.global.colours = ['#ff0000','#00ff00'];  
       
    // define the module
    angular
-   .module('daovoting', [ ngMaterial, ngAnimate, ngMessages, 'ui.identicon', ngSanitize])
+   .module('daovoting', [ ngMaterial, ngAnimate, ngMessages, 'ui.identicon', ngSanitize, 'chart.js'])
    // main controller
    .controller('DaoVotingCtrl', [ '$scope',  '$mdDialog', '$parse', '$filter', '$http','$sce', DaoVotingCtrl ])
    
@@ -97,10 +102,14 @@ import 'angular-identicon/dist/angular-identicon';
 		};
 	}])
    // config theme
-   .config(function($mdThemingProvider){
+   .config(function($mdThemingProvider,ChartJsProvider){
       $mdThemingProvider.theme('default')
       .primaryPalette('blue')
       .accentPalette('red');
+      ChartJsProvider.setOptions({
+        chartColors: ['#00FF00', '#FF0000'],
+        responsive: true
+      });
    }) ;
 
 
@@ -240,6 +249,26 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
         p.txHash  = tx.txHash;
         p.txData = tx.data;
         p.votes = tx.votes;
+        
+        var min=9999999999, max=0;
+        p.votes.forEach(function(v){  
+          min = Math.min(parseInt(v.block),min);
+          max = Math.max(parseInt(v.block),max);
+        });
+        var num  = parseInt((max-min)/ 423); // group in 2 hours which are about 423 blocks
+        var step = (max-min)/num;
+        
+        p.chartData = [[],[]];
+        p.chartLabels =[];
+        for (var n=0;n<num;n++) {
+          p.chartLabels.push(parseInt(num*step+min));
+          p.chartData[0].push(0);
+          p.chartData[1].push(0);
+        };
+        p.votes.forEach(function(v){
+          p.chartData[v.support?0:1][parseInt((v.block-min)/step)]+=web3.fromWei(v.balance,"ether")* (v.support?100:-100);
+        });
+        
         refresh();
       });
 
