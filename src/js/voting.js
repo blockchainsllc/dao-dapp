@@ -300,7 +300,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
           p.chartData[1].push(0);
         };
         p.votes.forEach(function(v){
-          p.chartData[v.support?0:1][parseInt((v.block-min)/step)]+=web3.fromWei(v.balance,"ether")* (v.support?100:-100);
+          p.chartData[v.support?0:1][parseInt((v.block-min)/step)]+=parseInt(web3.fromWei(v.balance,"ether")* (v.support?100:-100));
         });
         
         refresh();
