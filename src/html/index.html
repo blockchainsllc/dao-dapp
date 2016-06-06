@@ -89,7 +89,8 @@
                         </div>
                     </div>
                  </div>
-                    <div class="slideDown" layout="column"  collapse="currentProposal!==p" style="display:none;"" >
+                 <!---->
+                    <div class="slideDown" layout="column" collapse="currentProposal!==p" style="display:none;" >
                         <md-tabs md-dynamic-height md-border-bottom>
                             <md-tab label="Description">
                                 <md-content class="md-padding">
@@ -167,9 +168,9 @@
                                 </div>
                                 </md-content>
                             </md-tab>
-                            <md-tab label="Votes" md-on-select="p.chart.resize()">
+                            <md-tab label="Votes" >
                                 <md-content class="md-padding"  style="width:100%;height:270px;max-height:270px;padding-right:10px;overflow:hidden">
-                                    <canvas id="bar" class="chart chart-bar" chart-data="p.chartData" chart-options="{maintainAspectRatio:false}"
+                                    <canvas id="bar" class="chart chart-bar" chart-data="p.chartData" chart-options="{maintainAspectRatio:false, borderWidth:0,scales:{xAxes:[{stacked:true}]}}"
                                         chart-labels="p.chartLabels" chart-legend="false" chart-series="['yes','no']" >
                                     </canvas> 
                                 </md-content>

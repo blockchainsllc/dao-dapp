@@ -76,12 +76,14 @@ window.Chart = Chart;
           var autoHeight =   getElementAutoHeight();
 					var newHeight = collapse ? 2 : autoHeight;
 					element.style.height = newHeight + 'px';
+          if (newHeight>2) element.style.height = 'auto';
           element.style.opacity = collapse ? 0 : 1;
           element.style.transform = "scaleY("+(collapse ? 0 : 1)+")";
           element.style.pointerEvents= collapse ? 'none': 'auto';
           if (autoHeight>0)
 					   element.style.maxHeight = (collapse ? newHeight :autoHeight) + 'px';
 					ngElement.toggleClass('collapsed', collapse);
+          
 				});
 
 				function getElementAutoHeight() {
@@ -109,14 +111,27 @@ window.Chart = Chart;
       .accentPalette('red');
       ChartJsProvider.setOptions({
         size : {height:350},
-        chartColors: ['#009900', '#FF0000'],
+        chartColors: [
+          {
+            backgroundColor: 'rgba(0,153,0,0.8)',
+            borderWidth: 0,
+            pointBackgroundColor:'rgba(0,153,0,1)',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgba(0,153,0,0.8)'
+          },{
+            backgroundColor: 'rgba(200,0,0,0.8)',
+            borderWidth: 0,
+            pointBackgroundColor:'rgba(200,0,0,1)',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgba(200,0,0,0.8)'
+          }],
         responsive: true,
         scales: {
                 xAxes: [{
-                   scaleLabel: { display: false }
+                   scaleLabel: { display: false, stacked:true }
                 }],
                 yAxes: [{
-                    scaleLabel: {     display: false }
+                    scaleLabel: {     display: false, stacked:true }
                 }]
         }
       });
@@ -178,9 +193,9 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
    $scope.$on('chart-create', function(chart,controller) {
      chart=controller.chart;
      $scope.currentProposal.chart = chart; 
-     setTimeout(function(){
-       chart.resize();
-     },100);
+//     setTimeout(function(){
+//       chart.resize();
+//     },100);
      
    });
 
