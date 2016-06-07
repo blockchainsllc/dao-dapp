@@ -40,6 +40,7 @@ window.Chart = Chart;
    // create ethercamp link
    .filter('ethercamp', function() {
       return function(val) {
+        if (!val) return val;
         if (val.indexOf("0x")==0) val=val.substring(2);
         if (val.length>40)
           return "https://" + (connector.testnet ? "morden":"live") + ".ether.camp/transaction/"+val;
@@ -49,6 +50,7 @@ window.Chart = Chart;
     })
     .filter('timeleft', function() {
       return function(val) {
+        if (!val) return val;
          var left = val.getTime()- new Date().getTime();
          if (left<0)
            return val.toLocaleDateString();

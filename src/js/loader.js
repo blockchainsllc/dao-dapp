@@ -77,7 +77,7 @@ Connector.prototype.getStats = function($http, cb) {
    if (this.stats) return this.stats;
    var stats = this.stats = {}, web3 = this.web3, contract = this.contract, address=this.address, _=this;
    
-   if (!this.isMist && $http) {
+   if ($http) {
       $http({  
           method: 'POST',  url: 'https://vote.daohub.org/proposals.json'
       }).then(function (response) {
