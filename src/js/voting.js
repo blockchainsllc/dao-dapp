@@ -284,18 +284,24 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
         p.txData = tx.data;
         p.votes = tx.votes;
         
-        var min=9999999999, max=0;
-        p.votes.forEach(function(v){  
+        var min=9999999999, max=0,minTime=0,maxTime=0;
+        p.votes.forEach(function(v){
+          if (v.blockTime && (!minTime || minTime>v.blockTime)) minTime=v.blockTime;
+          if (v.blockTime && (!maxTime || maxTime<v.blockTime)) maxTime=v.blockTime;
           min = Math.min(parseInt(v.block),min);
           max = Math.max(parseInt(v.block),max);
         });
         var num  = parseInt((max-min)/ 423); // group in 2 hours which are about 423 blocks
         var step = (max-min)/num;
+        var stepTime = minTime ? (maxTime-minTime)/num : 0;
         
         p.chartData = [[],[]];
         p.chartLabels =[];
+        var year = new Date().getFullYear();
         for (var n=0;n<num;n++) {
-          p.chartLabels.push(parseInt(num*step+min));
+          var label = minTime ? new Date(parseInt(n*stepTime+minTime)*1000).toLocaleString().replace(year+"","").replace(".,",".") : parseInt(n*step+min);
+          if (minTime) label = label.substr(0,label.length-5)+"00";
+          p.chartLabels.push(label);
           p.chartData[0].push(0);
           p.chartData[1].push(0);
         };
