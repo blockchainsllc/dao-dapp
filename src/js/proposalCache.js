@@ -70,13 +70,24 @@ function startTxSearch(data, cb) {
     (page)=>cb(proposals,page));
 }
 
+function assignBlockTimes(proposals) {
+  proposals.forEach(p=>{
+    var min=null,max=null;
+    p.votes.forEach(v=>{
+      if (min==null || min.block>v.block) min=v;
+      if (max==null || max.block<v.block) max=v;
+    });
+    if (min) min.blockTime = connector.web3.eth.getBlock(min.block).timestamp;
+    if (max) max.blockTime = connector.web3.eth.getBlock(max.block).timestamp;
+  });
+  return proposals;
+}
 
 connector.createCache(function(result){
-   
    var target = "dist/proposals.json";
    fs.readFile(target, {encoding:'UTF-8'}, (err,data) => {
       startTxSearch(err ? { tx:[], page:80 } : JSON.parse(data), (proposals,page) => {
-         result.tx   = proposals;
+         result.tx   = assignBlockTimes(proposals);
          result.page = page;
          fs.writeFile(target,JSON.stringify(result));
          console.log("done");
