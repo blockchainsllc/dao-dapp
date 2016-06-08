@@ -7,6 +7,7 @@ import ngMessages from 'angular-messages';
 import ngSanitize from 'angular-sanitize';
 import Identicon from 'identicon.js/identicon';
 import Connector from './loader';
+import collapse from './collapse';
 window.Identicon = Identicon;
 import 'angular-identicon/dist/angular-identicon';
 import Chart from 'chart.js';
@@ -20,7 +21,9 @@ window.Chart = Chart;
    var connector = new Connector(window.web3, window.location.hash);
    var web3      = connector.web3;
    var address   = connector.address;
+   var now       = new Date();
 
+   // define default colors for charts
    window.Chart.defaults.global.colours = ['#ff0000','#00ff00'];  
       
    // define the module
@@ -30,82 +33,32 @@ window.Chart = Chart;
    .controller('DaoVotingCtrl', [ '$scope',  '$mdDialog', '$parse', '$filter', '$http','$sce', DaoVotingCtrl ])
    
    // format number
-   .filter('ethnumber', function() {
-      return function(val) {
-        if (val > 1000000)   return web3.toBigNumber(val/1000000).toFixed(2)+" M";
-        else if (val > 1000) return web3.toBigNumber(val/   1000).toFixed(2)+" K";
-        return web3.toBigNumber(val).toFixed(2);
-      };
-    })
+   .filter('ethnumber', () =>  function(val) {
+        if (val > 1000000)   return (val/1000000).toFixed(2)+" M";
+        else if (val > 1000) return (val/   1000).toFixed(2)+" K";
+        return val.toFixed(2);
+   })
    // create ethercamp link
-   .filter('ethercamp', function() {
-      return function(val) {
+   .filter('ethercamp', () => function(val) {
         if (!val) return val;
         if (val.indexOf("0x")==0) val=val.substring(2);
-        if (val.length>40)
-          return "https://" + (connector.testnet ? "morden":"live") + ".ether.camp/transaction/"+val;
-        else
-          return "https://" + (connector.testnet ? "morden":"live") + ".ether.camp/account/"+val;
-      };
+        return "https://" + (connector.testnet ? "morden":"live") + ".ether.camp/"+(val.length>40?"transaction/":"account/")+val;
     })
-    .filter('timeleft', function() {
-      return function(val) {
-        if (!val) return val;
-         var left = val.getTime()- new Date().getTime();
-         if (left<0)
-           return val.toLocaleDateString();
+    // format time left from a given date
+    .filter('timeleft', () => function(val) {
+         if (!val)     return val;
+         var left = val.getTime() - now.getTime();
+         if (left<0)   return val.toLocaleDateString();
             
          if (left>2 * 3600 * 1000 * 24) return parseInt(left/ (3600 * 1000 * 24)) + " days left";
          if (left>2 * 3600 * 1000     ) return parseInt(left/ (3600 * 1000     )) + " hours left";
          if (left>2 * 60 * 1000       ) return parseInt(left/ (60 * 1000       )) + " minutes left";
          return                                parseInt(left/ 1000              ) + " seconds left";
-      };
     })
     
    // collapse directive creating a nice accordian-effect when selecting
-   .directive('collapse', [function () {
-		return {
-			restrict: 'A',
-			link: function ($scope, ngElement, attributes) {
-				var element = ngElement[0];
-				$scope.$watch(attributes.collapse, function (collapse) {
-          if (collapse && element.style.display == 'none') {
-            element.style.height =  '0px';
-            element.style.transform = "scaleY(0)";
-            return;
-          }
-          if (!collapse)  element.style.display = 'block';
-          var autoHeight =   getElementAutoHeight();
-					var newHeight = collapse ? 2 : autoHeight;
-					element.style.height = newHeight + 'px';
-          if (newHeight>2) element.style.height = 'auto';
-          element.style.opacity = collapse ? 0 : 1;
-          element.style.transform = "scaleY("+(collapse ? 0 : 1)+")";
-          element.style.pointerEvents= collapse ? 'none': 'auto';
-          if (autoHeight>0)
-					   element.style.maxHeight = (collapse ? newHeight :autoHeight) + 'px';
-					ngElement.toggleClass('collapsed', collapse);
-          
-				});
+   .directive('collapse', [ collapse])
 
-				function getElementAutoHeight() {
-          var height = element.getAttribute("autHeight");
-          if (height && height>0) return parseInt(height);
-					var currentHeight = getElementCurrentHeight();
-					element.style.height = 'auto';
-					var autoHeight = getElementCurrentHeight();
-					element.style.height = currentHeight;
-					getElementCurrentHeight(); // Force the browser to recalc height after moving it back to normal
-          element.setAttribute("autHeight",autoHeight);
-					return autoHeight;
-				}
-
-				function getElementCurrentHeight() {
-					return element.offsetHeight
-				}
-			}
-		};
-	}])
    // config theme
    .config(function($mdThemingProvider,ChartJsProvider){
       $mdThemingProvider.theme('default')
@@ -129,12 +82,8 @@ window.Chart = Chart;
           }],
         responsive: true,
         scales: {
-                xAxes: [{
-                   scaleLabel: { display: false, stacked:true }
-                }],
-                yAxes: [{
-                    scaleLabel: {     display: false, stacked:true }
-                }]
+                xAxes: [{   scaleLabel: { display: false, stacked:true }    }],
+                yAxes: [{   scaleLabel: {     display: false, stacked:true }}]
         }
       });
    }) ;
@@ -151,9 +100,12 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
    $scope.proposals = [];                           // loaded Proposals
    $scope.isMist    = connector.isMist;
    $scope.address   = address;
+   $scope.warning   = "";
+
    // called, when selecting a proposal 
    $scope.showProposal = function(p,ev) {           
       $scope.currentProposal=p;
+      p.chartData = p._chartData;
       
       // if this proposal was taken from the cache we need to load the current values
       if (p.needsUpdate) loadProposal(p.id, refresh); 
@@ -189,20 +141,11 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
      });
    };
    
+   // voting outside of mist is done by myetherwallet
    $scope.openWallet = function() {
      window.open('https://www.myetherwallet.com/embedded-daoproposals.html?id='+$scope.currentProposal.id, 'myetherwallet', 'width=700,height=1000,menubar=no,resizable=yes,status=no,toolbar=no');
    }
    
-   $scope.$on('chart-create', function(chart,controller) {
-     chart=controller.chart;
-     $scope.currentProposal.chart = chart; 
-//     setTimeout(function(){
-//       chart.resize();
-//     },100);
-     
-   });
-
- 
 
    // builds the data for the vote-function   
    function buildVoteFunctionData(proposal, supports) {
@@ -232,7 +175,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
        setTimeout(function(){
            needsRefresh=false;
            $scope.$apply();
-       },10);
+       },500);
    }
    
    // cache results in the local storage
@@ -270,9 +213,12 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
         enabled        : connector.isMist,
         minQuroum      : function() {
           var totalInWei = web3.toWei($scope.total,"ether");
-          return  web3.fromWei( 
+          var result =  web3.fromWei( 
             totalInWei / $scope.minQuorumDivisor + 
             ( web3.toWei(this.amount,"ether")   * totalInWei) / (3 * ($scope.actualBalance + $scope.rewardToken)),"ether");
+          // after calculating for the first time we cache the result and simply return it.
+          if ($scope.rewardToken) this.minQuroum = ()=>result;
+          return result;
         },
         gasNeeded      : {},
         data           : proposal,
@@ -281,14 +227,15 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
       };
       
       connector.getTxData(idx,function(tx){
-        p.created = new Date(tx.created * 1000).toLocaleString() ;
-        p.block = tx.block;
-        p.txHash  = tx.txHash;
-        p.txData = tx.data;
-        p.votes = tx.votes;
+        let pp = $scope.proposals[idx-1] || p;
+        pp.created = new Date(tx.created * 1000).toLocaleString() ;
+        pp.block   = tx.block;
+        pp.txHash  = tx.txHash;
+        pp.txData  = tx.data;
+        pp.votes   = tx.votes;
         
         var min=9999999999, max=0,minTime=0,maxTime=0;
-        p.votes.forEach(function(v){
+        pp.votes.forEach(v => {
           if (v.blockTime && (!minTime || minTime>v.blockTime)) minTime=v.blockTime;
           if (v.blockTime && (!maxTime || maxTime<v.blockTime)) maxTime=v.blockTime;
           min = Math.min(parseInt(v.block),min);
@@ -298,31 +245,28 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
         var step = (max-min)/num;
         var stepTime = minTime ? (maxTime-minTime)/num : 0;
         
-        p.chartData = [[],[]];
-        p.chartLabels =[];
-        var year = new Date().getFullYear();
+        pp._chartData  = [[],[]];
+        pp.chartLabels = [];
+        var year       = now.getFullYear();
         for (var n=0;n<num;n++) {
           var label = minTime ? new Date(parseInt(n*stepTime+minTime)*1000).toLocaleString().replace(year+"","").replace(".,",".") : parseInt(n*step+min);
           if (minTime) label = label.substr(0,label.length-5)+"00";
-          p.chartLabels.push(label);
-          p.chartData[0].push(0);
-          p.chartData[1].push(0);
+          pp.chartLabels.push(label);
+          pp._chartData[0].push(0);
+          pp._chartData[1].push(0);
         };
-        p.votes.forEach(function(v){
-          p.chartData[v.support?0:1][parseInt((v.block-min)/step)]+=parseInt(web3.fromWei(v.balance,"ether")* (v.support?100:-100));
-        });
-        
+        pp.votes.forEach(v=> pp._chartData[v.support?0:1][parseInt((v.block-min)/step)]+=parseInt(web3.fromWei(v.balance,"ether")* (v.support?100:-100))  );
+
+        if (pp==$scope.currentProposal) pp.chartData = pp._chartData;
         refresh();
       });
 
       // define the type of proposal
-      if (p.split) 
-        p.type = p.recipient == p.creator ? 'solosplit' : 'fork';
-      else 
-        p.type = p.recipient == address && p.amount==0 ? 'informal' : 'proposal';
+      if (p.split)  p.type = p.recipient == p.creator ? 'solosplit' : 'fork';
+      else          p.type = p.recipient == address && p.amount==0 ? 'informal' : 'proposal';
         
       // add the filter-values.
-      p.active = p.votingDeadline.getTime() > new Date().getTime() && p.open;
+      p.active = p.votingDeadline.getTime() > now.getTime() && p.open;
       
       updateSplitAmount(p);
 
@@ -368,7 +312,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
 
    // loads one Proposal by calling the proposals(index)-function.
    function loadProposal(idx,cb) {
-      connector.loadProposal(idx,function(err,proposal){
+      connector.loadProposal(idx,(err,proposal)=>{
          if (err) {
              showAlert('Error getting the proposal '+idx, err);
              return;
@@ -382,14 +326,15 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
       });
    }
    
+   // calculate the progress in percent
    $scope.progress = function(val,total, y, n) {
-     total = Math.max(y,n) + (total - y -n)/2;
+     total = Math.max(y,n) + (total - y -n)/2; // correct total remove half to 50% of the yes and nos
      return 100 - Math.round(Math.pow(val/total-1,2)*1000)/10;
    }
    
    $scope.reload = function(force) {
     if (force) delete connector.stats;
-    connector.getStats($http, function(err, stats){
+    connector.getStats($http, (err, stats)=>{
       $scope.total            = stats.total;
       $scope.minQuorumDivisor = stats.minQuorumDivisor;
       $scope.actualBalance    = stats.actualBalance;
@@ -399,29 +344,31 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
       
       var idx = $scope.proposals.length+1;
         
-        // check if the proposal came from cache and needs to be updated
-        function nextReload(p) {
-          while (p && !p.needsUpdate) p=$scope.proposals[p.id];
-          if (p) loadProposal(p.id, nextReload);
-        }
+      // check if the proposal came from cache and needs to be updated
+      function nextReload(p) {
+        while (p && !p.needsUpdate) p=$scope.proposals[p.id];
+        if (p) loadProposal(p.id, nextReload);
+      }
         
-        // ... and now load each one of them.
-        function nextProposal() {
-          // after we read the missing, we read try to update the current ones as needed.
-          if (idx>$scope.allProposals) return nextReload($scope.proposals[0]); 
+      // ... and now load each one of them.
+      function nextProposal() {
+        // after we read the missing, we read try to update the current ones as needed.
+        if (idx>$scope.allProposals) return nextReload($scope.proposals[0]); 
               
-          loadProposal(idx++, function(p){
-              $scope.proposals[p.id-1]=p;
-              refresh();
-              nextProposal();
-          }); 
-        }
+        loadProposal(idx++, function(p){
+            $scope.proposals[p.id-1]=p;
+            refresh();
+            nextProposal();
+        }); 
+      }
         
-        // first read all missing proposals
-        nextProposal();
+      // first read all missing proposals
+      nextProposal();
       
     });
    };
+
+   // start loading...
    $scope.reload();
    
    // init mist-menu
