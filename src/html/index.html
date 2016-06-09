@@ -80,12 +80,11 @@
                         <identicon username="p.creator" size="48" class="face noselect" ng-click="showProposal(p)"></identicon>
                         <div class="md-list-item-text" flex>
                             <div flex layout="row" class="headline">
-                                <div class="desc noselect" ng-click="showProposal(p)">{{p.description}}
-                                    <md-progress-linear class="yesno" ng-show="!p.split" flex md-mode="buffer" value="{{progress(p.yea,total,p.yea,p.nay)}}"
-                                        md-buffer-value="{{progress(p.yea+p.nay,total,p.yea,p.nay)}}"></md-progress-linear>
+                                <div class="desc noselect" flex ng-click="showProposal(p)">{{p.description}}
+                                    <md-progress-linear class="yesno" ng-show="!p.split" flex md-mode="buffer" value="{{progress(p.yea,total)}}"
+                                        md-buffer-value="{{progress(p.yea+p.nay,total)}}"></md-progress-linear>
                                     <div class="date" title="voting deadline {{p.votingDeadline.toLocaleString()}}">{{p.votingDeadline | timeleft}}</div>
                                 </div>
-                                <div flex> </div>
                                 <div ng-show="(!p.split || (p.split && p.active)) && p.type!='informal'">
                                     <div class="amount">{{p.amount | ethnumber}}</div>
                                     <div class="eth">ETH</div>
