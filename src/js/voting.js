@@ -101,6 +101,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
    $scope.isMist    = connector.isMist;
    $scope.address   = address;
    $scope.warning   = "";
+   $scope.maxQuorum = 1;
 
    // called, when selecting a proposal 
    $scope.showProposal = function(p,ev) {           
@@ -307,6 +308,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
          p=existing;
       }
       
+      $scope.maxQuorum = Math.max( $scope.maxQuorum, p.minQuroum(), p.yea+p.nay );
       return p;
    }
 
@@ -329,7 +331,8 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
    // calculate the progress in percent
    $scope.progress = function(val,total, y, n) {
      if (y && n) total = Math.max(y,n) + (total - y -n)/2; // correct total remove half to 50% of the yes and nos
-     return 100 - Math.round(Math.pow(val/total-1,2)*1000)/10;
+     return total > 0? val / total * 100 : 0;
+//     return 100 - Math.round(Math.pow(val/total-1,2)*1000)/10;
    }
    
    $scope.reload = function(force) {

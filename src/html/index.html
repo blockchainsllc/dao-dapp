@@ -81,8 +81,8 @@
                         <div class="md-list-item-text" flex>
                             <div flex layout="row" class="headline">
                                 <div class="desc noselect" flex ng-click="showProposal(p)">{{p.description}}
-                                    <md-progress-linear class="yesno" ng-show="!p.split" flex md-mode="buffer" value="{{progress(p.yea,total)}}"
-                                        md-buffer-value="{{progress(p.yea+p.nay,total)}}"></md-progress-linear>
+                                    <md-progress-linear class="yesno" ng-show="!p.split" flex md-mode="buffer" value="{{progress(p.yea,maxQuorum)}}"
+                                        md-buffer-value="{{progress(p.yea+p.nay,maxQuorum)}}"></md-progress-linear>
                                     <div class="date" title="voting deadline {{p.votingDeadline.toLocaleString()}}">{{p.votingDeadline | timeleft}}</div>
                                 </div>
                                 <div ng-show="(!p.split || (p.split && p.active)) && p.type!='informal'">
@@ -176,7 +176,7 @@
                                         <div style="margin-top:20px" class="progressRow" layout="row" flex>
                                             <div class="plabel" style="width:30px">Yes:</div>
                                             <div class="pnumber" style="width:50px">({{p.yea*100/total | number:2}}%) &nbsp;</div>
-                                            <md-progress-linear class="yes" flex md-mode="buffer" value="{{progress(p.yea,total,p.yea,p.nay)}}" md-buffer-value="{{progress(p.minQuroum(),total,p.yea,p.nay)}}"></md-progress-linear>
+                                            <md-progress-linear class="yes" flex md-mode="determinate" value="{{progress(p.yea,p.yea+p.nay)}}" ></md-progress-linear>
                                             <div class="pnumber">{{p.yea*100 | ethnumber}} DAO </div>
                                             <div class="pnumber" style="width:60px">({{ ((p.votes||[]) | filter:{support:true}).length }} Tx) </div>
                                         </div>
@@ -184,7 +184,7 @@
                                         <div style="margin-bottom:20px" class="progressRow" layout="row" flex ng-show="!p.split">
                                             <div class="plabel" style="width:30px">No:</div>
                                             <div class="pnumber" style="width:50px">({{p.nay*100/total | number:2}}%) &nbsp;</div>
-                                            <md-progress-linear class="no" flex md-mode="buffer" value="{{progress(p.nay,total,p.yea,p.nay)}}" md-buffer-value="{{progress(p.minQuroum(),total,p.yea,p.nay)}}"></md-progress-linear>
+                                            <md-progress-linear class="no" flex md-mode="determinate" value="{{progress(p.nay,p.yea+p.nay)}}" ></md-progress-linear>
                                             <div class="pnumber">{{p.nay*100 | ethnumber}} DAO</div>
                                             <div class="pnumber" style="width:60px">({{ ((p.votes||[]) | filter:{support:false}).length }} Tx)</div>
                                         </div>
