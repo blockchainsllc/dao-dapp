@@ -170,5 +170,8 @@ md-progress-linear.yesno .md-container {
           box-shadow: none!important;
 }
 .progress {
-  background-color: white!important;
+  background-color: #f3f3ff!important;
+}
+.listitems {
+   background-color:#f3f3ff
 }

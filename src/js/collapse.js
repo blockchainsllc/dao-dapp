@@ -20,6 +20,10 @@ module.exports = function () {
             if (autoHeight > 0)
                element.style.maxHeight = (collapse ? newHeight : autoHeight) + 'px';
             ngElement.toggleClass('collapsed', collapse);
+            if (collapse)
+            setTimeout(()=>{
+               element.style.height=0;
+            },300) 
 
          });
 
