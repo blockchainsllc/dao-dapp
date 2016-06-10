@@ -124,7 +124,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
         });
       }
    };
-   
+
    // when the user clicks the vote-buttons
    $scope.sendVotingTransaction = function(ev, accept) {
      web3.eth.sendTransaction({
