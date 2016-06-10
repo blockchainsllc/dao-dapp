@@ -331,7 +331,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
    // calculate the progress in percent
    $scope.progress = function(val,total, y, n) {
      if (y && n) total = Math.max(y,n) + (total - y -n)/2; // correct total remove half to 50% of the yes and nos
-     return total > 0? val / total * 100 : 0;
+     return Math.round(total > 0? val / total * 10000 : 0)/100;
 //     return 100 - Math.round(Math.pow(val/total-1,2)*1000)/10;
    }
    

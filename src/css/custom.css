@@ -164,3 +164,11 @@ md-progress-linear.yesno .md-container {
 .slideDown md-tab-item {
     color: black !important;
 }
+
+.progress, .progress-bar {
+  -webkit-box-shadow: none!important;
+          box-shadow: none!important;
+}
+.progress {
+  background-color: white!important;
+}

@@ -81,8 +81,16 @@
                         <div class="md-list-item-text" flex>
                             <div flex layout="row" class="headline">
                                 <div class="desc noselect" flex ng-click="showProposal(p)">{{p.description}}
-                                    <md-progress-linear class="yesno" ng-show="!p.split" flex md-mode="buffer" value="{{progress(p.yea,maxQuorum)}}"
-                                        md-buffer-value="{{progress(p.yea+p.nay,maxQuorum)}}"></md-progress-linear>
+
+<div class="progress" style="height: 3px; margin-bottom: 3px; margin-right:10px" >
+  <div class="progress-bar progress-bar-success progress-bar-striped" style="width: {{progress(p.yea,maxQuorum)}}%">
+  </div>
+  <div class="progress-bar progress-bar-danger progress-bar-striped" style="width: {{progress(p.nay,maxQuorum)}}%">
+  </div>
+  <div class="progress-bar progress-bar-info" style="width: {{progress(p.minQuroum()-p.yea-p.nay,maxQuorum)}}%; background-color: #dddddd; height:1px">
+  </div>
+</div>
+
                                     <div class="date" title="voting deadline {{p.votingDeadline.toLocaleString()}}">{{p.votingDeadline | timeleft}}</div>
                                 </div>
                                 <div ng-show="(!p.split || (p.split && p.active)) && p.type!='informal'">
