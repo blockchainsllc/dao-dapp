@@ -1,14 +1,16 @@
 var Web3 = require("web3");
+var theDAO = "0xbb9bc244d798123fde783fcc1c72d3bb8c189413";
 
 function Connector(web3, address) {
     if (address && address.indexOf("#")==0) address = address.substring(1);
-    if (!address || address.length<40)      address = "0xbb9bc244d798123fde783fcc1c72d3bb8c189413";
+    if (!address || address.length<40)      address = theDAO;
     this.testnet = address.indexOf("T")==0;
     if (this.testnet)                       address = address.substring(1);
     if (address.indexOf("0x")<0)            address = "0x"+address;
     this.web3 = web3;
     this.address = address;
     this.isMist = typeof web3 !== 'undefined';
+    this.useCache = address==theDAO;
     
     // pick up the global web3-object injected by mist.
     if(this.isMist)
@@ -77,7 +79,7 @@ Connector.prototype.getStats = function($http, cb) {
    if (this.stats) return this.stats;
    var stats = this.stats = {}, web3 = this.web3, contract = this.contract, address=this.address, _=this;
    
-   if ($http) {
+   if ($http && this.useCache) {
       $http({  
           method: 'POST',  url: 'https://vote.daohub.org/proposals.json'
       }).then(function (response) {

@@ -211,7 +211,7 @@
                                         </div>
                                 </md-content>
                             </md-tab>
-                            <md-tab label="Votes" ng-show="currentProposal==p">
+                            <md-tab label="Votes" ng-show="currentProposal==p" ng-disabled="currentProposal!=p || !p.chartData || !p.votes || p.votes.length==0">
                                 <md-content class="md-padding" style="width:100%;height:240px;max-height:240px;padding-right:10px;overflow:hidden">
                                     <canvas id="bar" class="chart chart-bar" chart-data="p.chartData" chart-options="{maintainAspectRatio:false, borderWidth:0,scales:{xAxes:[{stacked:true}]}}"
                                         chart-labels="p.chartLabels" chart-legend="false" chart-series="['yes','no']">
