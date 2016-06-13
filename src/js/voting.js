@@ -221,6 +221,7 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
           if ($scope.rewardToken) this.minQuroum = ()=>result;
           return result;
         },
+        checkActive    : function() {      this.active = this.votingDeadline.getTime() > now.getTime() && this.open;   },
         gasNeeded      : {},
         data           : proposal,
         needsUpdate    : fromCache ? true : false,
@@ -267,8 +268,8 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
       else          p.type = p.recipient == address && p.amount==0 ? 'informal' : 'proposal';
         
       // add the filter-values.
-      p.active = p.votingDeadline.getTime() > now.getTime() && p.open;
       
+      p.checkActive();
       updateSplitAmount(p);
 
       // if the description contains JSON, we take the fields from there
@@ -415,6 +416,17 @@ function DaoVotingCtrl( $scope, $mdDialog, $parse, $filter, $http, $sce) {
     updateEntries();
     
    }         
+   
+   
+   // checkActive
+   setInterval(()=>{
+       $scope.proposals.forEach(p=>{
+            var old = p.active;
+            p.checkActive();
+            if (old!=p.active)
+                refresh();
+       });
+   },60000)
    
    
    
