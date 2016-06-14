@@ -32,7 +32,7 @@ function startTxSearch(data, cb) {
     var proposals = data.tx || [];
     searchTransactions(data.page || 80, tx => {
         // ignore throwing transactions
-        if (tx.cumulativeGasUsed==tx.gasUsed) return;
+        if (tx.gas==tx.gasUsed  || tx.isError!="0") return;
         
         if (tx.input.indexOf("0x612e45a3") == 0 && tx.isError == "0"/* && !tx.gasUsed>=tx.gas*/) // new Proposal!
         {
