@@ -31,6 +31,9 @@ function searchTransactions(startPage, handler, done) {
 function startTxSearch(data, cb) {
     var proposals = data.tx || [];
     searchTransactions(data.page || 80, tx => {
+        // ignore throwing transactions
+        if (tx.cumulativeGasUsed==tx.gasUsed) return;
+        
         if (tx.input.indexOf("0x612e45a3") == 0 && tx.isError == "0"/* && !tx.gasUsed>=tx.gas*/) // new Proposal!
         {
             try {
@@ -59,6 +62,7 @@ function startTxSearch(data, cb) {
             var proposalId = res[0].toNumber();
             var votes = (proposals[proposalId - 1] || (proposals[proposalId - 1] = { votes: [] })).votes;
             if (votes.find(v => v.tx == tx.hash)) return;
+            
 
             votes.push({
                 address: tx.from,
